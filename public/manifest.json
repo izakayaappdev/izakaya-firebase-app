@@ -1,0 +1,65 @@
+{
+  "name": "在庫管理アプリ",
+  "short_name": "在庫管理",
+  "description": "飲み屋向けの革新的な在庫管理システム",
+  "start_url": "/",
+  "id": "izakaya-stock-app",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#4CAF50",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "ja",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "商品追加",
+      "short_name": "追加",
+      "description": "新しい商品を追加",
+      "url": "/?action=add",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"}]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='844' viewBox='0 0 390 844'%3E%3Crect width='390' height='844' fill='%23f5f5f5'/%3E%3Crect x='0' y='0' width='390' height='60' fill='%234CAF50'/%3E%3Ctext x='195' y='38' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E在庫管理アプリ%3C/text%3E%3Crect x='20' y='80' width='350' height='700' fill='white' rx='12' stroke='%23ddd'/%3E%3Ctext x='195' y='120' font-size='16' text-anchor='middle' fill='%23333'%3E商品一覧%3C/text%3E%3Crect x='40' y='140' width='310' height='60' fill='%23f9f9f9' rx='8'/%3E%3Ctext x='60' y='165' font-size='14' fill='%23666'%3E🍺 アサヒスーパードライ%3C/text%3E%3Ctext x='60' y='185' font-size='12' fill='%23999'%3E在庫: 24個 | 利益率: 45%%3C/text%3E%3C/svg%3E",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "モバイル版ホーム画面"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='800' viewBox='0 0 1280 800'%3E%3Crect width='1280' height='800' fill='%23f5f5f5'/%3E%3Crect x='0' y='0' width='1280' height='80' fill='%234CAF50'/%3E%3Ctext x='640' y='48' font-size='24' text-anchor='middle' fill='white' font-weight='bold'%3E在庫管理アプリ - デスクトップ版%3C/text%3E%3Crect x='40' y='100' width='1200' height='660' fill='white' rx='16' stroke='%23ddd'/%3E%3Ctext x='640' y='150' font-size='20' text-anchor='middle' fill='%23333'%3E商品管理ダッシュボード%3C/text%3E%3Crect x='80' y='180' width='560' height='200' fill='%23f9f9f9' rx='12'/%3E%3Ctext x='90' y='210' font-size='16' fill='%23333'%3E商品一覧%3C/text%3E%3Crect x='680' y='180' width='520' height='200' fill='%23f9f9f9' rx='12'/%3E%3Ctext x='690' y='210' font-size='16' fill='%23333'%3E統計情報%3C/text%3E%3C/svg%3E",
+      "sizes": "1280x800", 
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "デスクトップ版ダッシュボード"
+    }
+  ]
+}

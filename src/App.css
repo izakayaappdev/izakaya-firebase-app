@@ -1,0 +1,458 @@
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.add-form {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.add-form h2 {
+  margin-top: 0;
+  color: #555;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+.add-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #666;
+}
+
+.add-form input, .add-form select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.add-form input.readonly {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.add-form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-form button:hover {
+  background-color: #45a049;
+}
+
+/* 飲み放題チェックボックス（フォーム内） */
+.nomihoudai-checkbox {
+  padding: 15px;
+  background-color: #fff3e0;
+  border: 2px dashed #ff6b35;
+  border-radius: 8px;
+  margin: 15px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nomihoudai-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #ff6b35;
+  margin: 0;
+  font-size: 16px;
+}
+
+.nomihoudai-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.add-form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-form button:hover {
+  background-color: #45a049;
+}
+
+/* 統計情報 */
+.stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value.profit {
+  color: #4CAF50;
+}
+
+/* フィルター */
+.filters {
+  margin-bottom: 20px;
+}
+
+.category-filter {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.category-filter button {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  background-color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.category-filter button.active {
+  background-color: #2196F3;
+  color: white;
+  border-color: #2196F3;
+}
+
+/* 利益率の色分け */
+.profit-rate {
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.high-profit {
+  color: #4CAF50;
+  background-color: #e8f5e8;
+}
+
+.medium-profit {
+  color: #ff9800;
+  background-color: #fff3e0;
+}
+
+.low-profit {
+  color: #f44336;
+  background-color: #ffebee;
+}
+
+/* ソート選択 */
+.sort-options {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-options label {
+  font-weight: bold;
+  color: #666;
+}
+
+/* 飲み放題関連スタイル */
+.nomihoudai-item {
+  border-left: 4px solid #ff6b35;
+}
+
+.nomihoudai-badge {
+  background-color: #ff6b35;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.nomihoudai-btn {
+  background-color: #f5f5f5 !important;
+  color: #666 !important;
+  border: 2px solid #ddd !important;
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+}
+
+.nomihoudai-btn.active {
+  background-color: #ff6b35 !important;
+  color: white !important;
+  border-color: #ff6b35 !important;
+}
+
+.nomihoudai-btn:hover {
+  border-color: #ff6b35 !important;
+}
+
+.nomihoudai-filter {
+  margin-top: 10px;
+}
+
+.nomihoudai-filter label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+}
+
+.nomihoudai-filter input[type="checkbox"] {
+  width: auto;
+}
+
+.stat-value.nomihoudai {
+  color: #ff6b35;
+}
+
+.product-list h2 {
+  color: #555;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* 検索ボックス */
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  box-sizing: border-box;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background-color: white;
+}
+
+/* 在庫少ない時の警告色 */
+.product-item.low-stock {
+  border-color: #ff9800;
+  background-color: #fff3e0;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.product-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-icon {
+  font-size: 20px;
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.product-details {
+  font-size: 14px;
+  color: #666;
+}
+
+.price-info {
+  font-family: monospace;
+}
+
+.warning {
+  color: #ff9800;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.out-of-stock {
+  color: #f44336;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.stock-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stock-controls button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 在庫切れ商品のスタイル */
+.product-item.out-of-stock-item {
+  border-color: #f44336;
+  background-color: #ffebee;
+  opacity: 0.8;
+}
+
+.status-badge {
+  background-color: #f44336;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.stock-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.restock-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.quick-restock {
+  display: flex;
+  gap: 3px;
+}
+
+.quick-btn {
+  background-color: #66bb6a !important;
+  color: white;
+  border: none;
+  padding: 3px 6px !important;
+  border-radius: 3px !important;
+  cursor: pointer;
+  font-size: 10px !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 25px;
+}
+
+.quick-btn:hover {
+  background-color: #4caf50 !important;
+}
+
+.restock-btn {
+  background-color: #4CAF50 !important;
+  width: auto !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+}
+
+.restock-btn:hover {
+  background-color: #45a049 !important;
+}
+
+.reset-btn {
+  background-color: #ff9800 !important;
+  width: auto !important;
+  padding: 5px 10px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+}
+
+.reset-btn:hover {
+  background-color: #f57c00 !important;
+}
+
+.delete-btn {
+  background-color: #f44336 !important;
+  width: 40px !important;
+  border-radius: 4px !important;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f !important;
+}
+
+.stock-count {
+  font-size: 16px;
+  font-weight: bold;
+  min-width: 60px;
+  text-align: center;
+  color: #333;
+}
