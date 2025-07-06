@@ -4,7 +4,7 @@ import { useProducts } from './hooks/useProducts';
 import './App.css';
 
 function App() {
-  const { user, login, logout } = useAuth();
+  const { user, loading, signInWithGoogle, logout } = useAuth();
   const { products, loading, error, addProduct, updateStock, deleteProduct, updateProduct } = useProducts(user);
   
   const [showAddForm, setShowAddForm] = useState(false);
@@ -162,7 +162,7 @@ function App() {
         <div className="login-card">
           <h1>🍻 飲み屋在庫管理</h1>
           <p>飲み物専門の在庫管理システム</p>
-          <button onClick={login} className="login-button">
+          <button onClick={signInWithGoogle} className="login-button">
             Googleでログイン
           </button>
         </div>
