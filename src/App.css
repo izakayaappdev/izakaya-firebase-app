@@ -177,3 +177,196 @@
     align-self: flex-start;
   }
 }
+
+/* トースト通知CSS（App.cssの最後に追加） */
+
+/* トーストコンテナ */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+/* トースト基本スタイル */
+.toast {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  min-width: 300px;
+  max-width: 400px;
+  pointer-events: all;
+  cursor: pointer;
+  animation: toastSlideIn 0.3s ease-out;
+  position: relative;
+}
+
+.toast:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* トースト種類別スタイル */
+.toast-success {
+  border-left: 4px solid #38a169;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+}
+
+.toast-error {
+  border-left: 4px solid #e53e3e;
+  background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+}
+
+.toast-info {
+  border-left: 4px solid #3182ce;
+  background: linear-gradient(135deg, #ffffff 0%, #ebf8ff 100%);
+}
+
+.toast-warning {
+  border-left: 4px solid #dd6b20;
+  background: linear-gradient(135deg, #ffffff 0%, #fffaf0 100%);
+}
+
+/* トーストコンテンツ */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 12px;
+}
+
+.toast-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  color: #2d3748;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* プログレスバー */
+.toast-progress {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  background: currentColor;
+  width: 100%;
+  transform: translateX(-100%);
+}
+
+.toast-success .toast-progress-bar {
+  background: #38a169;
+}
+
+.toast-error .toast-progress-bar {
+  background: #e53e3e;
+}
+
+.toast-info .toast-progress-bar {
+  background: #3182ce;
+}
+
+.toast-warning .toast-progress-bar {
+  background: #dd6b20;
+}
+
+/* アニメーション */
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .toast-container {
+    bottom: 80px; /* スマホのタブバーを避ける */
+    left: 20px;
+    right: 20px;
+    align-items: stretch;
+  }
+  
+  .toast {
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .toast-content {
+    padding: 14px 16px 10px;
+  }
+  
+  .toast-message {
+    font-size: 13px;
+  }
+  
+  .toast-icon {
+    font-size: 16px;
+  }
+}
+
+/* ダークモード対応（将来用） */
+@media (prefers-color-scheme: dark) {
+  .toast {
+    background: rgba(45, 55, 72, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .toast-message {
+    color: #e2e8f0;
+  }
+  
+  .toast-progress {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* 複数トースト時のスタッキング */
+.toast-container .toast:not(:first-child) {
+  margin-top: -4px;
+  transform: scale(0.95);
+  opacity: 0.8;
+  z-index: -1;
+}
+
+.toast-container .toast:not(:first-child):not(:nth-child(2)) {
+  transform: scale(0.9);
+  opacity: 0.6;
+  z-index: -2;
+}
+
+/* ホバー時のスタッキング解除 */
+.toast-container:hover .toast {
+  transform: none;
+  opacity: 1;
+  z-index: auto;
+  margin-top: 0;
+}

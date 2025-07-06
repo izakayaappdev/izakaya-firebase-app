@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useProducts } from './hooks/useProducts';
+import { useToast } from './hooks/useToast';
+import ToastContainer from './components/ToastContainer';
 import './App.css';
 
 // 管理者判定
@@ -597,14 +599,15 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
   );
 }
 
-// 顧客用アプリ（商品追加機能付き）
+// 顧客用アプリ（Toast通知対応）
 function CustomerApp({ user, logout, products, updateStock, addProduct, updateProduct, deleteProduct }) {
+  const { toasts, showToast, removeToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // 顧客側も泡盛カテゴリに対応
+  // 顧客側カテゴリ（泡盛対応）
   const categories = [
     'ビール', 
     '日本酒', 
@@ -622,9 +625,9 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
     category: 'ビール',
     cost: '',
     price: '',
-    description: '',
     stock: '',
     minStock: '',
+    description: '',
     isNomihodai: false
   });
 
@@ -635,9 +638,9 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
       category: 'ビール',
       cost: '',
       price: '',
-      description: '',
       stock: '',
       minStock: '',
+      description: '',
       isNomihodai: false
     });
     setShowAddForm(false);
@@ -648,7 +651,7 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
     e.preventDefault();
     
     if (!newProduct.name.trim()) {
-      alert('商品名は必須です');
+      showToast('商品名は必須です', 'error');
       return;
     }
 
@@ -662,30 +665,45 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
         profit: (parseFloat(newProduct.price) || 0) - (parseFloat(newProduct.cost) || 0),
         profitRate: (parseFloat(newProduct.price) && parseFloat(newProduct.cost)) ? 
           (((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price)) * 100) : 0,
-        isMaster: false, // 顧客追加商品はマスターではない
+        isMaster: false, // 顧客商品として追加
         addedBy: user.email, // 追加者を記録
         createdAt: new Date()
       };
 
       if (editingProduct) {
-        // 編集は自分が追加した商品のみ可能
         await updateProduct(editingProduct.id, productData);
+        showToast(`${newProduct.name} を更新しました`, 'success');
       } else {
         await addProduct(productData);
+        showToast(`${newProduct.name} を追加しました！`, 'success');
       }
       
       resetForm();
-      alert('商品を追加しました！管理者の確認後、他の店舗でも利用可能になる場合があります。');
     } catch (error) {
-      console.error('商品追加に失敗しました:', error);
-      alert('商品追加に失敗しました');
+      console.error('商品の保存に失敗しました:', error);
+      showToast('商品の保存に失敗しました', 'error');
+    }
+  };
+
+  const handleStockChange = async (productId, change) => {
+    try {
+      const product = products.find(p => p.id === productId);
+      const newStock = Math.max(0, product.stock + change);
+      await updateStock(productId, newStock);
+      
+      // 軽量な在庫変更通知
+      const changeText = change > 0 ? `+${change}` : change.toString();
+      showToast(`${product.name} ${changeText}`, 'info', 2000);
+    } catch (error) {
+      console.error('在庫更新に失敗しました:', error);
+      showToast('在庫更新に失敗しました', 'error');
     }
   };
 
   const handleEdit = (product) => {
-    // 自分が追加した商品のみ編集可能
-    if (product.addedBy !== user.email && product.isMaster) {
-      alert('マスター商品は編集できません');
+    // マスター商品は編集不可
+    if (product.isMaster) {
+      showToast('マスター商品は編集できません', 'warning');
       return;
     }
 
@@ -695,9 +713,9 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
       category: product.category,
       cost: product.cost.toString(),
       price: product.price.toString(),
-      description: product.description || '',
       stock: product.stock.toString(),
       minStock: product.minStock.toString(),
+      description: product.description || '',
       isNomihodai: product.isNomihodai
     });
     setEditingProduct(product);
@@ -707,30 +725,20 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
   const handleDelete = async (productId) => {
     const product = products.find(p => p.id === productId);
     
-    // 自分が追加した商品のみ削除可能
-    if (product.addedBy !== user.email && product.isMaster) {
-      alert('マスター商品は削除できません');
+    // マスター商品は削除不可
+    if (product.isMaster) {
+      showToast('マスター商品は削除できません', 'warning');
       return;
     }
 
-    if (window.confirm('この商品を削除しますか？')) {
+    if (window.confirm(`${product.name} を削除しますか？`)) {
       try {
         await deleteProduct(productId);
+        showToast(`${product.name} を削除しました`, 'success');
       } catch (error) {
         console.error('商品削除に失敗しました:', error);
-        alert('商品削除に失敗しました');
+        showToast('商品削除に失敗しました', 'error');
       }
-    }
-  };
-
-  const handleStockChange = async (productId, change) => {
-    try {
-      const product = products.find(p => p.id === productId);
-      const newStock = Math.max(0, product.stock + change);
-      await updateStock(productId, newStock);
-    } catch (error) {
-      console.error('在庫更新に失敗しました:', error);
-      alert('在庫更新に失敗しました');
     }
   };
 
@@ -1039,6 +1047,9 @@ function CustomerApp({ user, logout, products, updateStock, addProduct, updatePr
           )}
         </div>
       </main>
+
+      {/* Toast通知コンテナ */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }
