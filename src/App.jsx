@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from 'react';
+const handleDelete = async (productId) => {
+    if (window.confirm('この商品を削除しますか？')) {
+      try {
+        await deleteProduct(productId);
+      } catch (error) {
+        console.error('商品削除に失敗しました:', error);
+        alert('商品削除に失敗しました');
+      }
+    }
+  };import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useProducts } from './hooks/useProducts';
 import './App.css';
@@ -89,14 +98,44 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
     setShowAddForm(true);
   };
 
-  const handleDelete = async (productId) => {
-    if (window.confirm('この商品マスターを削除しますか？')) {
+  // マスター化機能
+  const handlePromoteToMaster = async (product) => {
+    if (window.confirm(`「${product.name}」をマスター商品に追加しますか？`)) {
       try {
-        await deleteProduct(productId);
+        // マスター商品として新規追加
+        const masterProduct = {
+          ...product,
+          isMaster: true,
+          stock: 0, // マスターは在庫0で開始
+          createdAt: new Date() // 新しい作成日時
+        };
+        
+        await addProduct(masterProduct);
+        
+        // 元の顧客商品を削除
+        await deleteProduct(product.id);
+        
+        alert('マスター商品に追加しました');
       } catch (error) {
-        console.error('商品削除に失敗しました:', error);
-        alert('商品削除に失敗しました');
+        console.error('マスター化に失敗しました:', error);
+        alert('マスター化に失敗しました');
       }
+    }
+  };
+
+  // 重複確認機能（将来実装）
+  const handleCheckDuplicate = (product) => {
+    // 簡単な名前マッチング
+    const possibleDuplicates = masterProducts.filter(master => 
+      master.name.toLowerCase().includes(product.name.toLowerCase()) ||
+      product.name.toLowerCase().includes(master.name.toLowerCase())
+    );
+    
+    if (possibleDuplicates.length > 0) {
+      const duplicateNames = possibleDuplicates.map(p => p.name).join(', ');
+      alert(`類似商品が見つかりました: ${duplicateNames}\n\n重複の可能性があります。`);
+    } else {
+      alert('類似商品は見つかりませんでした。\n\n新商品として安全にマスター化できます。');
     }
   };
 
@@ -130,7 +169,7 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
             className={`tab-button ${activeTab === 'customers' ? 'active' : ''}`}
             onClick={() => setActiveTab('customers')}
           >
-            顧客データ確認
+            顧客追加商品管理
           </button>
           <button 
             className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
@@ -211,24 +250,80 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
           </div>
         )}
 
-        {/* 顧客データ確認 */}
+        {/* 顧客追加商品管理 */}
         {activeTab === 'customers' && (
           <div>
-            <h2>顧客利用データ</h2>
-            <div className="products-grid">
-              {customerProducts.map(product => (
-                <div key={product.id} className="product-card customer-card">
-                  <div className="product-header">
-                    <h3>{product.name}</h3>
-                    <span className="customer-badge">顧客データ</span>
-                  </div>
-                  <div className="product-info">
-                    <div>在庫: {product.stock}</div>
-                    <div>更新: {product.updatedAt?.toDate().toLocaleDateString()}</div>
-                  </div>
-                </div>
-              ))}
+            <div className="admin-controls">
+              <h2>顧客追加商品管理</h2>
+              <p>お客さんが手動で追加した商品をマスターに追加できます</p>
             </div>
+
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>顧客追加商品</h3>
+                <p>{customerProducts.length}品目</p>
+              </div>
+              <div className="stat-card">
+                <h3>マスター化候補</h3>
+                <p>{customerProducts.filter(p => !p.isMaster).length}品目</p>
+              </div>
+            </div>
+
+            {customerProducts.length === 0 ? (
+              <div className="no-products">
+                <p>顧客が追加した商品はまだありません</p>
+                <p>お客さんが新しい商品を手動追加すると、ここに表示されます</p>
+              </div>
+            ) : (
+              <div className="products-grid">
+                {customerProducts.map(product => (
+                  <div key={product.id} className="product-card customer-card">
+                    <div className="product-header">
+                      <h3>{product.name}</h3>
+                      {product.manufacturer && (
+                        <span className="manufacturer">({product.manufacturer})</span>
+                      )}
+                      <span className="customer-badge">顧客追加</span>
+                      <span className={`category-badge category-${product.category.replace(/[・]/g, '-')}`}>
+                        {product.category}
+                      </span>
+                    </div>
+
+                    <div className="product-info">
+                      <div className="price-info">
+                        <div>仕入: {product.cost ? `¥${product.cost}` : '未設定'}</div>
+                        <div>販売: {product.price ? `¥${product.price}` : '未設定'}</div>
+                        <div>現在在庫: {product.stock}</div>
+                      </div>
+                      <div className="customer-info">
+                        <div>追加者: {product.addedBy}</div>
+                        <div>追加日: {product.createdAt?.toDate?.()?.toLocaleDateString() || '不明'}</div>
+                      </div>
+                    </div>
+
+                    <div className="product-actions">
+                      <button 
+                        onClick={() => handlePromoteToMaster(product)} 
+                        className="promote-button"
+                        title="この商品をマスターに追加"
+                      >
+                        ⬆️ マスター化
+                      </button>
+                      <button 
+                        onClick={() => handleCheckDuplicate(product)} 
+                        className="check-button"
+                        title="重複商品をチェック"
+                      >
+                        🔍 重複確認
+                      </button>
+                      <button onClick={() => handleDelete(product.id)} className="delete-button">
+                        🗑️ 削除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
