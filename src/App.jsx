@@ -53,22 +53,22 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!newProduct.name.trim() || !newProduct.price) {
-      alert('商品名、販売価格は必須です');
+    if (!newProduct.name.trim()) {
+      alert('商品名は必須です');
       return;
     }
 
     try {
       const productData = {
         ...newProduct,
-        cost: parseFloat(newProduct.cost) || 0, // 空欄の場合は0
-        price: parseFloat(newProduct.price),
+        cost: parseFloat(newProduct.cost) || 0,
+        price: parseFloat(newProduct.price) || 0, // 空欄の場合は0
         stock: parseInt(newProduct.stock) || 0,
         minStock: parseInt(newProduct.minStock) || 0,
-        profit: parseFloat(newProduct.price) - (parseFloat(newProduct.cost) || 0),
-        profitRate: parseFloat(newProduct.cost) ? 
-          ((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price) * 100) : 
-          100 // 仕入れ値なしの場合は100%利益として表示
+        profit: (parseFloat(newProduct.price) || 0) - (parseFloat(newProduct.cost) || 0),
+        profitRate: (parseFloat(newProduct.price) && parseFloat(newProduct.cost)) ? 
+          (((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price)) * 100) : 
+          0 // 価格・仕入れ値どちらかなしの場合は0%
       };
 
       if (editingProduct) {
@@ -306,13 +306,12 @@ function App() {
                   </div>
 
                   <div className="form-group">
-                    <label>販売価格 (円) *</label>
+                    <label>販売価格 (円)</label>
                     <input
                       type="number"
                       value={newProduct.price}
                       onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                      placeholder="例：450"
-                      required
+                      placeholder="例：450（任意）"
                     />
                   </div>
 
@@ -385,10 +384,10 @@ function App() {
 
                 <div className="product-info">
                   <div className="price-info">
-                    <div>仕入: ¥{product.cost}</div>
-                    <div>販売: ¥{product.price}</div>
+                    <div>仕入: {product.cost ? `¥${product.cost}` : '未設定'}</div>
+                    <div>販売: {product.price ? `¥${product.price}` : '未設定'}</div>
                     <div className={`profit ${product.profitRate > 50 ? 'high' : product.profitRate > 30 ? 'medium' : 'low'}`}>
-                      利益: ¥{product.profit} ({product.profitRate.toFixed(1)}%)
+                      利益: {(product.price && product.cost) ? `¥${product.profit} (${product.profitRate.toFixed(1)}%)` : '算出不可'}
                     </div>
                   </div>
 
