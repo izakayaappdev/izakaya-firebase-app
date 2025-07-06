@@ -1,7 +1,8 @@
 import React from 'react';
 
+// Toast通知表示コンポーネント
 function ToastContainer({ toasts, removeToast }) {
-  if (toasts.length === 0) return null;
+  if (!toasts || toasts.length === 0) return null;
 
   return (
     <div className="toast-container">
@@ -26,6 +27,7 @@ function ToastContainer({ toasts, removeToast }) {
               e.stopPropagation();
               removeToast(toast.id);
             }}
+            aria-label="通知を閉じる"
           >
             ×
           </button>

@@ -1,108 +1,162 @@
-/* 顧客用新機能追加スタイル（App.cssの最後に追加） */
+/* ==========================================
+   飲み屋在庫管理アプリ - 完全整理CSS
+   レイアウト修正版・中央寄せ完全対応
+   ========================================== */
 
-/* 商品カードの区別 */
-.product-card.master-product {
-  border-left: 4px solid #4299e1;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+/* === ヘッダー === */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.product-card.my-product {
-  border-left: 4px solid #38a169;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
-}
-
-/* バッジコンテナ */
-.product-badges {
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.75rem 2rem;
+  height: 60px;
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-/* マスター商品バッジ */
-.master-badge {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.3rem;
-  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
 }
 
-/* 自分で追加商品バッジ */
-.my-badge {
-  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
+.user-info {
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+  gap: 10px;
 }
 
-/* 利益表示の改善 */
-.price-info-customer .profit {
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
 }
 
-.price-info-customer .profit.high {
-  background: #e6fffa;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.price-info-customer .profit.medium {
-  background: #fef5e7;
-  color: #c05621;
-  border: 1px solid #fed7aa;
-}
-
-.price-info-customer .profit.low {
-  background: #fed7d7;
-  color: #c53030;
-  border: 1px solid #feb2b2;
-}
-
-/* 飲み放題バッジの改善 */
-.nomihodai-badge {
-  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+.logout-button {
+  padding: 6px 12px;
+  background: #ef4444;
   color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.logout-button:hover {
+  background: #dc2626;
+}
+
+/* === 下部タブ === */
+.admin-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.tab-button {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-top: 3px solid transparent;
+  transition: all 0.2s ease;
   text-align: center;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 4px rgba(237, 137, 54, 0.3);
 }
 
-/* 商品追加フォームの説明文スタイル */
-.modal-content p {
-  background: #f0f9ff;
-  padding: 0.75rem;
+.tab-button:hover {
+  color: #374151;
+  background: #f9fafb;
+}
+
+.tab-button.active {
+  color: #3b82f6;
+  background: #eff6ff;
+  border-top-color: #3b82f6;
+}
+
+/* === 統計カード === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
   border-radius: 8px;
-  border-left: 3px solid #0ea5e9;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
 }
 
-/* 検索・フィルター・追加ボタンのレイアウト改善 */
+.stat-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* === コントロールエリア === */
+.admin-controls {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-controls h2 {
+  margin: 0;
+  color: #374151;
+}
+
+.customer-controls {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  justify-content: center;
+}
+
 .controls {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 1rem;
-  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
@@ -113,8 +167,387 @@
   min-width: 0;
 }
 
-/* 追加ボタンのスタイル改善 */
-.add-button {
+.search-input,
+.filter-select,
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+/* === 商品グリッド === */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  justify-items: center;
+  place-content: start;
+}
+
+/* === 商品カード === */
+.product-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 180px;
+  width: 100%;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* 管理者カード - カテゴリ色の背景 */
+.product-card.admin-card {
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card.admin-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.product-card.admin-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* カテゴリ別背景色 */
+.product-card.admin-card[data-category="ビール"]::before { background: #f59e0b; }
+.product-card.admin-card[data-category="日本酒"]::before { background: #10b981; }
+.product-card.admin-card[data-category="焼酎"]::before { background: #8b5cf6; }
+.product-card.admin-card[data-category="泡盛"]::before { background: #ec4899; }
+.product-card.admin-card[data-category="ワイン"]::before { background: #eab308; }
+.product-card.admin-card[data-category="カクテル・チューハイ"]::before { background: #06b6d4; }
+.product-card.admin-card[data-category="ソフトドリンク"]::before { background: #3b82f6; }
+.product-card.admin-card[data-category="ノンアルコール"]::before { background: #6b7280; }
+
+/* 商品画像 */
+.product-image {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 8px auto;
+  border-radius: 6px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #9ca3af;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* 商品ヘッダー */
+.product-header {
+  margin-bottom: 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.product-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #374151;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.manufacturer {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* バッジ */
+.product-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.category-badge,
+.customer-badge,
+.master-badge,
+.user-added-badge {
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.master-badge {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.user-added-badge {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+}
+
+.customer-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* カテゴリ別バッジ色 */
+.category-badge {
+  color: white;
+  font-weight: 600;
+}
+
+.category-ビール { background: #f59e0b; }
+.category-日本酒 { background: #10b981; }
+.category-焼酎 { background: #8b5cf6; }
+.category-泡盛 { background: #ec4899; }
+.category-ワイン { background: #eab308; }
+.category-カクテル-チューハイ { background: #06b6d4; }
+.category-ソフトドリンク { background: #3b82f6; }
+.category-ノンアルコール { background: #6b7280; }
+
+/* 在庫コントロール */
+.stock-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.stock-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stock-button.minus {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.stock-button.minus:hover {
+  background: #fecaca;
+}
+
+.stock-button.plus {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.stock-button.plus:hover {
+  background: #bbf7d0;
+}
+
+.stock-display {
+  font-weight: 600;
+  font-size: 12px;
+  min-width: 60px;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #f8fafc;
+}
+
+.stock-display.low-stock {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* 商品情報（価格情報は管理画面では非表示、CustomerAppでのみ表示） */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+/* 顧客アプリでの価格情報表示 */
+.price-info-customer {
+  font-size: 11px;
+  background: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.price-info-customer span {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+/* 商品説明 */
+.product-description {
+  font-size: 10px;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 4px 6px;
+  border-radius: 3px;
+  margin: 4px 0;
+  line-height: 1.3;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* アクションボタン */
+.product-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.edit-button,
+.delete-button,
+.promote-button,
+.check-button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.edit-button {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.edit-button:hover {
+  background: #dbeafe;
+}
+
+.delete-button {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.delete-button:hover {
+  background: #fecaca;
+}
+
+.promote-button {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.promote-button:hover {
+  background: #dcfce7;
+}
+
+.check-button {
+  background: #fefbeb;
+  color: #d97706;
+}
+
+.check-button:hover {
+  background: #fef3c7;
+}
+
+/* その他の要素 */
+.nomihodai-badge {
+  font-size: 9px;
+  padding: 2px 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 3px;
+  text-align: center;
+  margin: 4px 0;
+}
+
+.restock-button {
+  width: 100%;
+  padding: 6px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+.restock-button:hover {
+  background: #2563eb;
+}
+
+.customer-info {
+  font-size: 9px;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 6px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.customer-info div {
+  margin: 3px 0;
+}
+
+/* === ボタンスタイル === */
+.add-button,
+.add-first-button {
   background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
   color: white;
   border: none;
@@ -129,83 +562,158 @@
   min-width: 140px;
 }
 
-.add-button:hover {
+.add-button:hover,
+.add-first-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(56, 161, 105, 0.4);
 }
 
-/* 商品アクションボタンの調整 */
-.product-actions {
+/* === モーダル === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-/* ホバー効果の改善 */
-.product-card.master-product:hover {
-  box-shadow: 0 8px 25px rgba(66, 153, 225, 0.15);
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-.product-card.my-product:hover {
-  box-shadow: 0 8px 25px rgba(56, 161, 105, 0.15);
+.modal-content h2 {
+  margin: 0 0 20px 0;
+  color: #374151;
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .search-filters {
-    flex-direction: column;
-  }
-  
-  .add-button {
-    width: 100%;
-  }
-  
-  .product-badges {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .master-badge,
-  .my-badge {
-    align-self: flex-start;
-  }
+.modal-content p {
+  background: #f0f9ff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #0ea5e9;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-/* トースト通知CSS（App.cssの最後に追加） */
+/* === フォーム === */
+.product-form {
+  width: 100%;
+}
 
-/* トーストコンテナ */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background: #5b6471;
+}
+
+.submit-button {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background: #2563eb;
+}
+
+/* === トースト通知 - 中央上部配置 === */
 .toast-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+  align-items: center;
 }
 
-/* トースト基本スタイル */
 .toast {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
   overflow: hidden;
-  min-width: 300px;
+  min-width: 240px;
   max-width: 400px;
   pointer-events: all;
   cursor: pointer;
-  animation: toastSlideIn 0.3s ease-out;
+  animation: toastSlideDown 0.3s ease-out;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .toast:hover {
@@ -213,7 +721,6 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* トースト種類別スタイル */
 .toast-success {
   border-left: 4px solid #38a169;
   background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
@@ -234,16 +741,16 @@
   background: linear-gradient(135deg, #ffffff 0%, #fffaf0 100%);
 }
 
-/* トーストコンテンツ */
 .toast-content {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px 12px;
+  gap: 8px;
+  padding: 8px 12px;
+  flex: 1;
 }
 
 .toast-icon {
-  font-size: 18px;
+  font-size: 16px;
   flex-shrink: 0;
 }
 
@@ -251,122 +758,329 @@
   color: #2d3748;
   font-weight: 500;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.3;
   flex: 1;
 }
 
-/* プログレスバー */
-.toast-progress {
-  height: 3px;
-  background: rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.toast-progress-bar {
-  height: 100%;
-  background: currentColor;
-  width: 100%;
-  transform: translateX(-100%);
+.toast-close:hover {
+  color: #374151;
+  background: rgba(0, 0, 0, 0.05);
 }
 
-.toast-success .toast-progress-bar {
-  background: #38a169;
-}
-
-.toast-error .toast-progress-bar {
-  background: #e53e3e;
-}
-
-.toast-info .toast-progress-bar {
-  background: #3182ce;
-}
-
-.toast-warning .toast-progress-bar {
-  background: #dd6b20;
-}
-
-/* アニメーション */
-@keyframes toastSlideIn {
+@keyframes toastSlideDown {
   from {
-    transform: translateX(100%);
+    transform: translateY(-100%);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
-@keyframes toastProgress {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
+/* === その他 === */
+.no-products {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.no-products p {
+  margin: 0.5rem 0;
+  font-size: 16px;
+}
+
+.category-analysis {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.category-analysis h3 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  text-align: center;
+}
+
+.category-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.category-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+/* ==========================================
+   管理者専用CSS - Layout.css準拠版
+   ========================================== */
+
+/* 管理者メインコンテンツ - Layout.cssと同じ中央寄せパターン */
+.admin-main-content {
+  width: 100vw;
+  max-width: none;
+  margin: 0;
+  padding: 85px 0 80px 0;
+  min-height: calc(100vh - 150px);
+  
+  /* Layout.cssと同じ中央寄せ設定 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* 管理者セクション別スタイル - Layout.cssパターンを踏襲 */
+.admin-stats-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.admin-stats-section .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+.admin-controls-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-controls-section .admin-controls {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-filters-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.admin-filters-section .admin-search-controls {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-filters-section .search-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  width: 100%;
+}
+
+.admin-products-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-products-section .products-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1300px;
+  padding: 0 2rem;
+  justify-items: center;
+}
+
+.admin-category-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.admin-category-section .category-analysis {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+/* 管理者統計カード特殊スタイル */
+.admin-stats-section .stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border: 1px solid #e0f2fe;
+}
+
+.admin-stats-section .stat-card h3 {
+  color: #0369a1;
+}
+
+.admin-stats-section .stat-card p {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* === レスポンシブ対応 === */
+@media (max-width: 1400px) {
+  .products-grid,
+  .admin-products-section .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1000px;
   }
 }
 
-/* モバイル対応 */
+@media (max-width: 1200px) {
+  .products-grid,
+  .admin-products-section .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 800px;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-main-content {
+    padding: 85px 0 80px 0;
+  }
+  
+  .stats-grid,
+  .admin-stats-section .stats-grid,
+  .admin-controls,
+  .admin-controls-section .admin-controls,
+  .customer-controls,
+  .controls,
+  .products-grid,
+  .admin-products-section .products-grid,
+  .category-analysis,
+  .admin-category-section .category-analysis,
+  .admin-filters-section .admin-search-controls {
+    padding: 0 1rem;
+  }
+  
+  .products-grid,
+  .admin-products-section .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 600px;
+  }
+  
+  .stats-grid,
+  .admin-stats-section .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-filters,
+  .admin-filters-section .search-filters {
+    flex-direction: column;
+    max-width: none;
+  }
+  
+  .search-input,
+  .filter-select,
+  .sort-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .add-button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .toast-container {
-    bottom: 80px; /* スマホのタブバーを避ける */
+    top: 80px;
     left: 20px;
     right: 20px;
-    align-items: stretch;
+    transform: none;
   }
   
   .toast {
     min-width: auto;
     max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .products-grid,
+  .admin-products-section .products-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+  
+  .stats-grid,
+  .admin-stats-section .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .product-card {
+    min-height: 160px;
+  }
+  
+  .toast-container {
+    top: 75px;
+    left: 10px;
+    right: 10px;
   }
   
   .toast-content {
-    padding: 14px 16px 10px;
+    padding: 12px 16px;
   }
   
   .toast-message {
-    font-size: 13px;
+    font-size: 14px;
   }
   
   .toast-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 
-/* ダークモード対応（将来用） */
-@media (prefers-color-scheme: dark) {
-  .toast {
-    background: rgba(45, 55, 72, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+@media (max-width: 480px) {
+  .form-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .toast-message {
-    color: #e2e8f0;
-  }
-  
-  .toast-progress {
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* 複数トースト時のスタッキング */
-.toast-container .toast:not(:first-child) {
-  margin-top: -4px;
-  transform: scale(0.95);
-  opacity: 0.8;
-  z-index: -1;
-}
-
-.toast-container .toast:not(:first-child):not(:nth-child(2)) {
-  transform: scale(0.9);
-  opacity: 0.6;
-  z-index: -2;
-}
-
-/* ホバー時のスタッキング解除 */
-.toast-container:hover .toast {
-  transform: none;
-  opacity: 1;
-  z-index: auto;
-  margin-top: 0;
 }

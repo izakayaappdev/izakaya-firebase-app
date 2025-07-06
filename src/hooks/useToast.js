@@ -1,39 +1,41 @@
 import { useState, useCallback } from 'react';
 
-export const useToast = () => {
+// Toast通知管理フック
+export function useToast() {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback((message, type = 'info', duration = 3000) => {
+  // Toast追加
+  const addToast = useCallback((message, type = 'info', duration = 3000) => {
     const id = Date.now() + Math.random();
-    const toast = {
+    const newToast = {
       id,
       message,
       type, // 'success', 'error', 'warning', 'info'
       duration
     };
 
-    setToasts(prev => [...prev, toast]);
+    setToasts(prev => [...prev, newToast]);
 
     // 自動削除
     setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
+      removeToast(id);
     }, duration);
-
-    return id; // IDを返すことで、必要に応じて手動削除可能
   }, []);
 
+  // Toast削除
   const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  const clearAllToasts = useCallback(() => {
+  // 全Toast削除
+  const clearToasts = useCallback(() => {
     setToasts([]);
   }, []);
 
   return {
     toasts,
-    showToast,
+    addToast,
     removeToast,
-    clearAllToasts
+    clearToasts
   };
-};
+}
