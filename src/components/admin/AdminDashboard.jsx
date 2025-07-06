@@ -61,6 +61,7 @@ function ProductMasterManager({
   addProduct, 
   updateProduct, 
   deleteProduct, 
+  generateProductCode,
   addToast 
 }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -79,6 +80,9 @@ function ProductMasterManager({
     price: '',
     description: '',
     image: '',
+    productCode: '',
+    volume: '',
+    volumeUnit: 'ml',
     isMaster: true
   });
 
@@ -91,6 +95,9 @@ function ProductMasterManager({
       price: '',
       description: '',
       image: '',
+      productCode: '',
+      volume: '',
+      volumeUnit: 'ml',
       isMaster: true
     });
     setShowAddForm(false);
@@ -110,6 +117,7 @@ function ProductMasterManager({
         ...newProduct,
         cost: parseFloat(newProduct.cost) || 0,
         price: parseFloat(newProduct.price) || 0,
+        volume: parseFloat(newProduct.volume) || 0,
         stock: 0,
         minStock: 0,
         profit: (parseFloat(newProduct.price) || 0) - (parseFloat(newProduct.cost) || 0),
@@ -119,11 +127,21 @@ function ProductMasterManager({
       };
 
       if (editingProduct) {
-        await updateProduct(editingProduct.id, productData);
-        addToast(`${newProduct.name}を更新しました`, 'success');
+        const result = await updateProduct(editingProduct.id, productData);
+        if (result.success) {
+          addToast(`${newProduct.name}を更新しました`, 'success');
+        } else {
+          addToast(result.error || '更新に失敗しました', 'error');
+          return;
+        }
       } else {
-        await addProduct(productData);
-        addToast(`${newProduct.name}を追加しました！`, 'success');
+        const result = await addProduct(productData);
+        if (result.success) {
+          addToast(`${newProduct.name}を追加しました！`, 'success');
+        } else {
+          addToast(result.error || '追加に失敗しました', 'error');
+          return;
+        }
       }
       
       resetForm();
@@ -142,6 +160,9 @@ function ProductMasterManager({
       price: product.price.toString(),
       description: product.description || '',
       image: product.image || '',
+      productCode: product.productCode || '',
+      volume: product.volume?.toString() || '',
+      volumeUnit: product.volumeUnit || 'ml',
       isMaster: true
     });
     setEditingProduct(product);
@@ -160,12 +181,19 @@ function ProductMasterManager({
     }
   };
 
+  // 商品コード自動生成
+  const handleGenerateProductCode = () => {
+    const autoCode = generateProductCode();
+    setNewProduct({...newProduct, productCode: autoCode});
+  };
+
   // フィルター・ソート機能
   const masterProducts = products
     .filter(product => product.isMaster)
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (product.manufacturer && product.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()));
+                           (product.manufacturer && product.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (product.productCode && product.productCode.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -230,7 +258,7 @@ function ProductMasterManager({
           <div className="search-filters">
             <input
               type="text"
-              placeholder="商品名・メーカーで検索..."
+              placeholder="商品名・メーカー・商品コードで検索..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -304,6 +332,12 @@ function ProductMasterManager({
                 </div>
 
                 <div className="product-info">
+                  {product.productCode && (
+                    <div className="product-code">商品コード: {product.productCode}</div>
+                  )}
+                  {product.volume > 0 && (
+                    <div className="product-volume">容量: {product.volume}{product.volumeUnit}</div>
+                  )}
                   {product.description && (
                     <div className="product-description">{product.description}</div>
                   )}
@@ -367,6 +401,54 @@ function ProductMasterManager({
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="product-code">商品コード</label>
+                  <div className="product-code-input">
+                    <input
+                      id="product-code"
+                      name="productCode"
+                      type="text"
+                      value={newProduct.productCode}
+                      onChange={(e) => setNewProduct({...newProduct, productCode: e.target.value})}
+                      placeholder="例：PROD001"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGenerateProductCode}
+                      className="generate-code-button"
+                    >
+                      自動生成
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="product-volume">容量</label>
+                  <input
+                    id="product-volume"
+                    name="productVolume"
+                    type="number"
+                    value={newProduct.volume}
+                    onChange={(e) => setNewProduct({...newProduct, volume: e.target.value})}
+                    placeholder="例：350"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="product-volume-unit">容量単位</label>
+                  <select
+                    id="product-volume-unit"
+                    name="productVolumeUnit"
+                    value={newProduct.volumeUnit}
+                    onChange={(e) => setNewProduct({...newProduct, volumeUnit: e.target.value})}
+                  >
+                    <option value="ml">ml</option>
+                    <option value="L">L</option>
                   </select>
                 </div>
 
@@ -445,26 +527,28 @@ function CustomerProductManager({
   const masterProducts = products.filter(product => product.isMaster);
   const customerProducts = products.filter(product => !product.isMaster);
 
-  const handlePromoteToMaster = async (product) => {
-    if (window.confirm(`「${product.name}」をマスター商品に追加しますか？`)) {
-      try {
-        const masterProduct = {
-          ...product,
-          isMaster: true,
-          stock: 0,
-          createdAt: new Date()
-        };
-        
-        await addProduct(masterProduct);
-        await deleteProduct(product.id);
-        
-        addToast(`${product.name}をマスター商品に追加しました`, 'success');
-      } catch (error) {
-        console.error('マスター化に失敗しました:', error);
-        addToast('マスター化に失敗しました', 'error');
+  // マスター化処理の修正版（AdminDashboard.jsx内の該当関数）
+
+const handlePromoteToMaster = async (product) => {
+  if (window.confirm(`「${product.name}」をマスター商品に変更しますか？`)) {
+    try {
+      // 元の商品を削除せず、isMasterフラグだけ変更
+      const result = await updateProduct(product.id, {
+        isMaster: true,
+        updatedAt: new Date()
+      });
+      
+      if (result.success) {
+        addToast(`${product.name}をマスター商品に変更しました`, 'success');
+      } else {
+        addToast(result.error || 'マスター化に失敗しました', 'error');
       }
+    } catch (error) {
+      console.error('マスター化に失敗しました:', error);
+      addToast('マスター化に失敗しました', 'error');
     }
-  };
+  }
+};
 
   const handleCheckDuplicate = (product) => {
     const possibleDuplicates = masterProducts.filter(master => 
@@ -558,6 +642,12 @@ function CustomerProductManager({
                 </div>
 
                 <div className="customer-info">
+                  {product.productCode && (
+                    <div>商品コード: {product.productCode}</div>
+                  )}
+                  {product.volume > 0 && (
+                    <div>容量: {product.volume}{product.volumeUnit}</div>
+                  )}
                   <div>追加者: {product.addedBy}</div>
                   <div>追加日: {product.createdAt?.toDate?.()?.toLocaleDateString() || '不明'}</div>
                 </div>
@@ -644,7 +734,7 @@ function DataAnalytics({ products }) {
 
 // メイン管理者ダッシュボード
 function AdminDashboard({ user, logout, addToast }) {
-  const { products, loading, error, addProduct, updateProduct, deleteProduct } = useProducts(user);
+  const { products, loading, error, addProduct, updateProduct, deleteProduct, generateProductCode } = useProducts(user);
   const [activeTab, setActiveTab] = useState('products');
 
   if (loading) {
@@ -673,6 +763,7 @@ function AdminDashboard({ user, logout, addToast }) {
             addProduct={addProduct}
             updateProduct={updateProduct}
             deleteProduct={deleteProduct}
+            generateProductCode={generateProductCode}
             addToast={addToast}
           />
         )}
@@ -695,5 +786,7 @@ function AdminDashboard({ user, logout, addToast }) {
     </div>
   );
 }
+
+
 
 export default AdminDashboard;

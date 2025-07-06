@@ -20,6 +20,27 @@ export const useProducts = (user) => {
   // productsRef をuseEffect外で定義（userがある場合のみ）
   const productsRef = user ? collection(db, 'users', user.uid, 'products') : null;
 
+  // 商品コード自動採番
+  const generateProductCode = () => {
+    const existingCodes = products
+      .map(p => p.productCode)
+      .filter(code => code && code.startsWith('PROD'))
+      .map(code => {
+        const num = parseInt(code.replace('PROD', ''));
+        return isNaN(num) ? 0 : num;
+      });
+    
+    const maxNum = Math.max(0, ...existingCodes);
+    return `PROD${String(maxNum + 1).padStart(3, '0')}`;
+  };
+
+  // 商品コード重複チェック
+  const isProductCodeDuplicate = (productCode, excludeId = null) => {
+    return products.some(p => 
+      p.productCode === productCode && p.id !== excludeId
+    );
+  };
+
   // リアルタイム同期
   useEffect(() => {
     if (!user || !productsRef) {
@@ -52,7 +73,7 @@ export const useProducts = (user) => {
     );
 
     return () => unsubscribe();
-  }, [user?.uid]); // user.uid を依存配列に
+  }, [user?.uid]);
 
   // 商品追加
   const addProduct = async (productData) => {
@@ -61,12 +82,23 @@ export const useProducts = (user) => {
     }
 
     try {
+      // 商品コードが指定されていない場合は自動生成
+      const productCode = productData.productCode || generateProductCode();
+      
+      // 商品コード重複チェック
+      if (isProductCodeDuplicate(productCode)) {
+        return { success: false, error: '商品コードが重複しています' };
+      }
+
       const newProduct = {
         ...productData,
-        stock: Number(productData.stock),
-        cost: Number(productData.cost),
-        price: Number(productData.price),
-        minStock: Number(productData.minStock),
+        productCode,
+        stock: Number(productData.stock || 0),
+        cost: Number(productData.cost || 0),
+        price: Number(productData.price || 0),
+        minStock: Number(productData.minStock || 0),
+        volume: Number(productData.volume || 0),
+        volumeUnit: productData.volumeUnit || 'ml',
         addedBy: user.email,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -88,11 +120,35 @@ export const useProducts = (user) => {
     }
 
     try {
+      // 商品コードが変更される場合は重複チェック
+      if (updateData.productCode && isProductCodeDuplicate(updateData.productCode, productId)) {
+        return { success: false, error: '商品コードが重複しています' };
+      }
+
       const productDoc = doc(db, 'users', user.uid, 'products', productId);
-      await updateDoc(productDoc, {
+      const processedData = {
         ...updateData,
         updatedAt: serverTimestamp()
-      });
+      };
+
+      // 数値フィールドの処理
+      if (updateData.volume !== undefined) {
+        processedData.volume = Number(updateData.volume);
+      }
+      if (updateData.stock !== undefined) {
+        processedData.stock = Number(updateData.stock);
+      }
+      if (updateData.cost !== undefined) {
+        processedData.cost = Number(updateData.cost);
+      }
+      if (updateData.price !== undefined) {
+        processedData.price = Number(updateData.price);
+      }
+      if (updateData.minStock !== undefined) {
+        processedData.minStock = Number(updateData.minStock);
+      }
+
+      await updateDoc(productDoc, processedData);
       return { success: true };
     } catch (error) {
       console.error('商品更新エラー:', error);
@@ -172,6 +228,8 @@ export const useProducts = (user) => {
     updateProduct,
     deleteProduct,
     updateStock,
-    migrateFromLocalStorage
+    migrateFromLocalStorage,
+    generateProductCode,
+    isProductCodeDuplicate
   };
 };
