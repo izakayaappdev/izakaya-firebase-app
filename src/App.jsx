@@ -53,20 +53,22 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!newProduct.name.trim() || !newProduct.cost || !newProduct.price) {
-      alert('商品名、仕入れ値、販売価格は必須です');
+    if (!newProduct.name.trim() || !newProduct.price) {
+      alert('商品名、販売価格は必須です');
       return;
     }
 
     try {
       const productData = {
         ...newProduct,
-        cost: parseFloat(newProduct.cost),
+        cost: parseFloat(newProduct.cost) || 0, // 空欄の場合は0
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock) || 0,
         minStock: parseInt(newProduct.minStock) || 0,
-        profit: parseFloat(newProduct.price) - parseFloat(newProduct.cost),
-        profitRate: ((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price) * 100)
+        profit: parseFloat(newProduct.price) - (parseFloat(newProduct.cost) || 0),
+        profitRate: parseFloat(newProduct.cost) ? 
+          ((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price) * 100) : 
+          100 // 仕入れ値なしの場合は100%利益として表示
       };
 
       if (editingProduct) {
@@ -294,13 +296,12 @@ function App() {
                   </div>
 
                   <div className="form-group">
-                    <label>仕入れ値 (円) *</label>
+                    <label>仕入れ値 (円)</label>
                     <input
                       type="number"
                       value={newProduct.cost}
                       onChange={(e) => setNewProduct({...newProduct, cost: e.target.value})}
-                      placeholder="例：125"
-                      required
+                      placeholder="例：125（任意）"
                     />
                   </div>
 
