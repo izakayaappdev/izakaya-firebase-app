@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
   const { user, login, logout } = useAuth();
-  const { products, loading, error, addProduct, updateProductStock, deleteProduct, updateProduct } = useProducts();
+  const { products, loading, error, addProduct, updateStock, deleteProduct, updateProduct } = useProducts(user);
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +26,7 @@ function App() {
 
   const [newProduct, setNewProduct] = useState({
     name: '',
-    manufacturer: '', // 新規追加：メーカー項目
+    manufacturer: '',
     category: 'ビール',
     cost: '',
     price: '',
@@ -62,17 +62,17 @@ function App() {
       const productData = {
         ...newProduct,
         cost: parseFloat(newProduct.cost) || 0,
-        price: parseFloat(newProduct.price) || 0, // 空欄の場合は0
+        price: parseFloat(newProduct.price) || 0,
         stock: parseInt(newProduct.stock) || 0,
         minStock: parseInt(newProduct.minStock) || 0,
         profit: (parseFloat(newProduct.price) || 0) - (parseFloat(newProduct.cost) || 0),
         profitRate: (parseFloat(newProduct.price) && parseFloat(newProduct.cost)) ? 
           (((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price)) * 100) : 
-          0 // 価格・仕入れ値どちらかなしの場合は0%
+          0
       };
 
       if (editingProduct) {
-        // 編集モード（既存商品の更新）
+        // 編集モード
         if (updateProduct) {
           await updateProduct(editingProduct.id, productData);
         } else {
@@ -93,7 +93,9 @@ function App() {
 
   const handleStockChange = async (productId, change) => {
     try {
-      await updateProductStock(productId, change);
+      const product = products.find(p => p.id === productId);
+      const newStock = Math.max(0, product.stock + change);
+      await updateStock(productId, newStock);
     } catch (error) {
       console.error('在庫更新に失敗しました:', error);
       alert('在庫更新に失敗しました');
@@ -103,7 +105,7 @@ function App() {
   const handleEdit = (product) => {
     setNewProduct({
       name: product.name,
-      manufacturer: product.manufacturer || '', // メーカー情報
+      manufacturer: product.manufacturer || '',
       category: product.category,
       cost: product.cost.toString(),
       price: product.price.toString(),
@@ -126,7 +128,7 @@ function App() {
     }
   };
 
-  // 検索・フィルター・ソート機能（メーカー検索追加）
+  // 検索・フィルター・ソート機能
   const filteredAndSortedProducts = products
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
