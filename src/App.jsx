@@ -1,13 +1,4 @@
-const handleDelete = async (productId) => {
-    if (window.confirm('この商品を削除しますか？')) {
-      try {
-        await deleteProduct(productId);
-      } catch (error) {
-        console.error('商品削除に失敗しました:', error);
-        alert('商品削除に失敗しました');
-      }
-    }
-  };import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useProducts } from './hooks/useProducts';
 import './App.css';
@@ -15,15 +6,140 @@ import './App.css';
 // 管理者判定
 const ADMIN_EMAIL = 'izakaya.app.dev@gmail.com';
 
+// CSVインポートコンポーネント（AdminDashboard内に追加）
+function CSVImportComponent({ onImport }) {
+  const [csvData, setCsvData] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+
+  const handleCSVImport = async () => {
+    if (!csvData.trim()) {
+      alert('CSVデータを入力してください');
+      return;
+    }
+
+    setIsImporting(true);
+    
+    try {
+      // CSVをパース
+      const lines = csvData.trim().split('\n');
+      
+      const products = [];
+      
+      for (let i = 1; i < lines.length; i++) { // ヘッダー行をスキップ
+        const values = lines[i].split(',');
+        
+        if (values.length >= 4) { // 最低限の項目チェック
+          const product = {
+            name: values[0]?.trim() || '',
+            manufacturer: values[1]?.trim() || '',
+            category: values[2]?.trim() || 'ビール',
+            cost: parseFloat(values[3]) || 0,
+            price: parseFloat(values[4]) || 0,
+            description: values[5]?.trim() || '',
+            stock: 0,
+            minStock: 0,
+            isMaster: true,
+            isNomihodai: false,
+            profit: (parseFloat(values[4]) || 0) - (parseFloat(values[3]) || 0),
+            profitRate: (parseFloat(values[4]) && parseFloat(values[3])) ? 
+              (((parseFloat(values[4]) - parseFloat(values[3])) / parseFloat(values[4])) * 100) : 0
+          };
+          
+          products.push(product);
+        }
+      }
+      
+      // 一括インポート実行
+      let successCount = 0;
+      for (const product of products) {
+        try {
+          await onImport(product);
+          successCount++;
+          // Firebase負荷軽減のため少し間隔を空ける
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          console.error(`商品「${product.name}」の登録に失敗:`, error);
+        }
+      }
+      
+      alert(`${successCount}/${products.length}品目のインポートが完了しました！`);
+      setCsvData('');
+      
+    } catch (error) {
+      console.error('CSVインポートエラー:', error);
+      alert('CSVインポートに失敗しました: ' + error.message);
+    }
+    
+    setIsImporting(false);
+  };
+
+  const sampleCSV = `商品名,メーカー,カテゴリ,仕入れ値,販売価格,説明
+アサヒスーパードライ 350ml缶,アサヒビール,ビール,150,450,定番の辛口ビール
+鍋島 純米吟醸,富久千代酒造,日本酒,1200,2800,佐賀県を代表する銘酒`;
+
+  return (
+    <div className="csv-import-section">
+      <h3>🚀 CSV一括インポート</h3>
+      <p>CSVデータを貼り付けて130品目を一括登録できます</p>
+      
+      <div className="csv-format-info">
+        <h4>CSVフォーマット例:</h4>
+        <pre>{sampleCSV}</pre>
+      </div>
+      
+      <textarea
+        value={csvData}
+        onChange={(e) => setCsvData(e.target.value)}
+        placeholder="ここにCSVデータを貼り付けてください...&#10;（商品名,メーカー,カテゴリ,仕入れ値,販売価格,説明の順で）"
+        rows="12"
+        className="csv-input"
+        disabled={isImporting}
+      />
+      
+      <div className="csv-actions">
+        <button 
+          onClick={handleCSVImport}
+          disabled={isImporting || !csvData.trim()}
+          className="import-button"
+        >
+          {isImporting ? 'インポート中...' : '🚀 CSVインポート実行'}
+        </button>
+        
+        <button 
+          onClick={() => setCsvData('')}
+          disabled={isImporting}
+          className="clear-button"
+        >
+          クリア
+        </button>
+      </div>
+      
+      {isImporting && (
+        <div className="importing-status">
+          <div className="loading-spinner"></div>
+          <p>商品を登録中です...しばらくお待ちください（{csvData.split('\n').length - 1}品目）</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 管理者用ダッシュボード
 function AdminDashboard({ user, logout, products, addProduct, updateProduct, deleteProduct }) {
   const [activeTab, setActiveTab] = useState('products');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // 飲み物専門カテゴリー
+  // 唐津市向け飲み物専門カテゴリー（泡盛追加）
   const categories = [
-    'ビール', '日本酒', '焼酎', 'ワイン', 'カクテル・チューハイ', 'ノンアルコール', 'ソフトドリンク'
+    'ビール', 
+    '日本酒', 
+    '焼酎', 
+    '泡盛',           // 新規追加
+    'ワイン', 
+    'カクテル・チューハイ', 
+    'ソフトドリンク',
+    'ノンアルコール'
   ];
 
   const [newProduct, setNewProduct] = useState({
@@ -98,6 +214,17 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
     setShowAddForm(true);
   };
 
+  const handleDelete = async (productId) => {
+    if (window.confirm('この商品を削除しますか？')) {
+      try {
+        await deleteProduct(productId);
+      } catch (error) {
+        console.error('商品削除に失敗しました:', error);
+        alert('商品削除に失敗しました');
+      }
+    }
+  };
+
   // マスター化機能
   const handlePromoteToMaster = async (product) => {
     if (window.confirm(`「${product.name}」をマスター商品に追加しますか？`)) {
@@ -123,7 +250,7 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
     }
   };
 
-  // 重複確認機能（将来実装）
+  // 重複確認機能
   const handleCheckDuplicate = (product) => {
     // 簡単な名前マッチング
     const possibleDuplicates = masterProducts.filter(master => 
@@ -189,6 +316,9 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
               </button>
             </div>
 
+            {/* ここにCSVインポート機能を追加 */}
+            <CSVImportComponent onImport={addProduct} />
+
             <div className="stats-grid">
               <div className="stat-card">
                 <h3>マスター商品数</h3>
@@ -197,6 +327,14 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
               <div className="stat-card">
                 <h3>顧客利用商品</h3>
                 <p>{customerProducts.length}品目</p>
+              </div>
+              <div className="stat-card">
+                <h3>カテゴリ数</h3>
+                <p>{categories.length}カテゴリ</p>
+              </div>
+              <div className="stat-card">
+                <h3>総商品数</h3>
+                <p>{products.length}品目</p>
               </div>
             </div>
 
@@ -337,8 +475,34 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
                 <p>{products.length}品目</p>
               </div>
               <div className="stat-card">
+                <h3>マスター商品</h3>
+                <p>{masterProducts.length}品目</p>
+              </div>
+              <div className="stat-card">
+                <h3>顧客追加商品</h3>
+                <p>{customerProducts.length}品目</p>
+              </div>
+              <div className="stat-card">
                 <h3>カテゴリ数</h3>
                 <p>{categories.length}カテゴリ</p>
+              </div>
+            </div>
+            
+            {/* カテゴリ別分析 */}
+            <div className="category-analysis">
+              <h3>カテゴリ別商品数</h3>
+              <div className="category-stats">
+                {categories.map(category => {
+                  const categoryCount = masterProducts.filter(p => p.category === category).length;
+                  return (
+                    <div key={category} className="category-stat">
+                      <span className={`category-badge category-${category.replace(/[・]/g, '-')}`}>
+                        {category}
+                      </span>
+                      <span className="count">{categoryCount}品目</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -357,7 +521,7 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
                       type="text"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                      placeholder="例：スーパードライ"
+                      placeholder="例：アサヒスーパードライ 350ml缶"
                       required
                     />
                   </div>
@@ -391,7 +555,7 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
                       type="number"
                       value={newProduct.cost}
                       onChange={(e) => setNewProduct({...newProduct, cost: e.target.value})}
-                      placeholder="例：125"
+                      placeholder="例：150"
                     />
                   </div>
 
@@ -410,7 +574,7 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
                     <textarea
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                      placeholder="例：定番の辛口ビール"
+                      placeholder="例：定番の辛口ビール。唐津市内でも人気の銘柄"
                       rows="3"
                     />
                   </div>
@@ -438,8 +602,16 @@ function CustomerApp({ user, logout, products, updateStock }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
 
+  // 顧客側も泡盛カテゴリに対応
   const categories = [
-    'ビール', '日本酒', '焼酎', 'ワイン', 'カクテル・チューハイ', 'ノンアルコール', 'ソフトドリンク'
+    'ビール', 
+    '日本酒', 
+    '焼酎', 
+    '泡盛',           // 新規追加
+    'ワイン', 
+    'カクテル・チューハイ', 
+    'ソフトドリンク',
+    'ノンアルコール'
   ];
 
   const handleStockChange = async (productId, change) => {
@@ -453,14 +625,20 @@ function CustomerApp({ user, logout, products, updateStock }) {
     }
   };
 
-  // 検索・フィルター
+  // 検索・フィルター（マスター商品のみ表示）
   const filteredProducts = products
+    .filter(product => product.isMaster) // マスター商品のみ
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (product.manufacturer && product.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
       return matchesSearch && matchesCategory;
     });
+
+  // 統計計算（顧客の在庫のみ）
+  const totalValue = filteredProducts.reduce((sum, product) => sum + (product.cost * product.stock), 0);
+  const totalProfit = filteredProducts.reduce((sum, product) => sum + (product.profit * product.stock), 0);
+  const lowStockCount = filteredProducts.filter(product => product.stock <= product.minStock && product.stock > 0).length;
 
   return (
     <div className="app">
@@ -476,6 +654,26 @@ function CustomerApp({ user, logout, products, updateStock }) {
       </header>
 
       <main className="main-content">
+        {/* 統計サマリー */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <h3>在庫価値</h3>
+            <p>¥{totalValue.toLocaleString()}</p>
+          </div>
+          <div className="stat-card">
+            <h3>想定利益</h3>
+            <p>¥{totalProfit.toLocaleString()}</p>
+          </div>
+          <div className="stat-card">
+            <h3>在庫少警告</h3>
+            <p>{lowStockCount}品目</p>
+          </div>
+          <div className="stat-card">
+            <h3>商品数</h3>
+            <p>{filteredProducts.length}品目</p>
+          </div>
+        </div>
+
         {/* 検索・フィルター */}
         <div className="controls">
           <div className="search-filters">
@@ -521,6 +719,10 @@ function CustomerApp({ user, logout, products, updateStock }) {
                 </div>
 
                 <div className="product-info">
+                  {product.description && (
+                    <div className="product-description">{product.description}</div>
+                  )}
+                  
                   <div className="stock-controls">
                     <button
                       onClick={() => handleStockChange(product.id, -1)}
@@ -541,6 +743,14 @@ function CustomerApp({ user, logout, products, updateStock }) {
                       ➕
                     </button>
                   </div>
+
+                  {/* 価格情報（顧客にも表示） */}
+                  {(product.cost || product.price) && (
+                    <div className="price-info-customer">
+                      {product.cost && <span>仕入: ¥{product.cost}</span>}
+                      {product.price && <span>販売: ¥{product.price}</span>}
+                    </div>
+                  )}
 
                   {product.stock === 0 && (
                     <button
@@ -572,7 +782,8 @@ function App() {
       <div className="login-container">
         <div className="login-card">
           <h1>🍻 飲み屋在庫管理システム</h1>
-          <p>管理者・店舗向け在庫管理システム</p>
+          <p>唐津市の飲み屋向け在庫管理システム</p>
+          <p>佐賀の地酒から九州焼酎・沖縄泡盛まで対応</p>
           <button onClick={signInWithGoogle} className="login-button">
             Googleでログイン
           </button>

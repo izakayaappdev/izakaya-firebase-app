@@ -1,661 +1,254 @@
-/* 基本スタイル */
-.app {
-  min-height: 100vh;
-  background: #f8f9fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* CSVインポート機能用スタイル（App.cssの最後に追加） */
 
-/* ローディング画面スタイル */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-size: 1.5rem;
-}
-
-/* ログイン画面スタイル */
-.login-container {
-  max-width: 500px;
-  margin: 0 auto;
+.csv-import-section {
+  background: linear-gradient(135deg, #f6f9fc 0%, #e9f5ff 100%);
   padding: 2rem;
-  text-align: center;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1f5fe;
+  position: relative;
+  overflow: hidden;
 }
 
-.login-header h1 {
-  font-size: 2.5rem;
+.csv-import-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #4299e1 0%, #38a169 100%);
+}
+
+.csv-import-section h3 {
+  color: #2d3748;
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
-}
-
-.login-header p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  margin-bottom: 2rem;
-}
-
-.login-features {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-}
-
-.feature {
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border-left: 4px solid #3498db;
-}
-
-.feature h3 {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-.feature p {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-}
-
-.google-login-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 24px;
+  gap: 0.5rem;
+}
+
+.csv-import-section > p {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.csv-format-info {
   background: white;
-  border: 2px solid #dadce0;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #3c4043;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  border-left: 4px solid #4299e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.google-login-btn:hover {
-  background: #f8f9fa;
-  border-color: #c4c7c5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.csv-format-info h4 {
+  color: #2d3748;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
 }
 
-.google-login-btn img {
-  width: 20px;
-  height: 20px;
-}
-
-.login-note {
-  margin-top: 1rem;
-}
-
-.login-note p {
-  color: #27ae60;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-/* ヘッダーのユーザー情報 */
-.app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-content h1 {
+.csv-format-info pre {
+  font-size: 0.85rem;
+  color: #4a5568;
   margin: 0;
-  font-size: 1.8rem;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid white;
-}
-
-.logout-btn {
-  background: rgba(255,255,255,0.2);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 0.5rem 1rem;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  font-family: 'Courier New', monospace;
+  background: #f8fafc;
+  padding: 1rem;
   border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
 }
 
-.logout-btn:hover {
-  background: rgba(255,255,255,0.3);
+.csv-input {
+  width: 100%;
+  padding: 1.2rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 250px;
+  background: white;
+  transition: all 0.3s ease;
+  line-height: 1.5;
 }
 
-/* Firestore関連スタイル */
-.migration-status {
-  background: #e3f2fd;
-  border: 1px solid #2196f3;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-  text-align: center;
-  font-weight: 500;
+.csv-input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+  transform: translateY(-1px);
 }
 
-.error-message {
-  background: #ffebee;
-  border: 1px solid #f44336;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-  text-align: center;
+.csv-input:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
 }
 
-.error-message button {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 0.5rem;
+.csv-input::placeholder {
+  color: #a0aec0;
+  font-style: italic;
 }
 
-.products-loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  font-size: 1.1rem;
+.csv-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.migrate-btn {
-  background: #4caf50;
+.import-button {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  margin-top: 1rem;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-.migrate-btn:hover {
-  background: #45a049;
-}
-
-/* 統計表示 */
-.stats {
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.stat-item {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-/* コントロール */
-.controls {
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
-}
-
-.search-filter {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 1rem;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.search-input,
-.filter-select,
-.sort-select {
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-
-.search-input:focus,
-.filter-select:focus,
-.sort-select:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-/* 商品追加フォーム */
-.add-product {
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
-}
-
-.add-product h3 {
-  margin-bottom: 1rem;
-  color: #2c3e50;
-  font-size: 1.3rem;
-}
-
-.product-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* フォームラベル対応 */
-.form-row {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.form-row label {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-size: 0.9rem;
-}
-
-.form-row input,
-.form-row select {
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-
-.form-row input:focus,
-.form-row select:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.form-row-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  color: #333;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-
-.form-actions {
-  margin-top: 1.5rem;
-}
-
-.add-btn, .save-btn, .cancel-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-btn {
-  background: #27ae60;
-  color: white;
+.import-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
   width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
-.add-btn:hover {
-  background: #219a52;
+.import-button:hover::before {
+  left: 100%;
 }
 
-.edit-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.import-button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-.save-btn {
-  background: #3498db;
-  color: white;
-}
-
-.save-btn:hover {
-  background: #2980b9;
-}
-
-.cancel-btn {
-  background: #95a5a6;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background: #7f8c8d;
-}
-
-/* 商品一覧 */
-.products {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.products h3 {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  font-size: 1.3rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #666;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.empty-state button {
-  margin-top: 1rem;
-}
-
-.product-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.product-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.2s ease;
-  border-left: 4px solid #3498db;
-}
-
-.product-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+.import-button:hover:not(:disabled) {
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
 }
 
-.product-card.low-stock {
-  border-left-color: #f39c12;
+.import-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.product-card.out-of-stock {
-  border-left-color: #e74c3c;
-}
-
-.product-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
-}
-
-.product-header h4 {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-.nomihodai-badge {
-  background: #27ae60;
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: bold;
-}
-
-.product-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.edit-btn,
-.delete-btn {
-  background: none;
+.clear-button {
+  background: #e2e8f0;
+  color: #4a5568;
   border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.3rem;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-.edit-btn:hover {
-  background: #f0f0f0;
-}
-
-.delete-btn:hover {
-  background: #ffe6e6;
-}
-
-.product-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.stock-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.stock-number {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.stock-label {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.restock-btn {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.restock-btn:hover {
-  background: #2980b9;
-}
-
-.stock-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.stock-btn {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  font-weight: bold;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.stock-btn.decrease {
-  background: #e74c3c;
-  color: white;
+.clear-button:hover:not(:disabled) {
+  background: #cbd5e0;
+  transform: translateY(-1px);
 }
 
-.stock-btn.decrease:hover {
-  background: #c0392b;
+.clear-button:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
 }
 
-.stock-btn.increase {
-  background: #27ae60;
-  color: white;
-}
-
-.stock-btn.increase:hover {
-  background: #219a52;
-}
-
-.product-details {
-  margin-top: 1rem;
-}
-
-.price-info {
+.importing-status {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+  border-radius: 12px;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  animation: pulse-import 2s ease-in-out infinite;
 }
 
-.price-info span {
-  color: #666;
+@keyframes pulse-import {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
+  }
 }
 
-.profit {
-  font-weight: bold;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
+.importing-status .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #a7f3d0;
+  border-left: 3px solid #38a169;
+  margin-bottom: 0;
 }
 
-.profit.high-profit {
-  background: #d5f4e6;
-  color: #27ae60;
-}
-
-.profit.medium-profit {
-  background: #fef9e7;
-  color: #f39c12;
-}
-
-.profit.low-profit {
-  background: #fdeaea;
-  color: #e74c3c;
-}
-
-.stock-warning {
-  text-align: center;
-}
-
-.warning {
-  font-weight: bold;
-  font-size: 0.8rem;
-}
-
-.stock-warning .warning {
-  color: #e74c3c;
+.importing-status p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .csv-import-section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
   
-  .header-content h1 {
-    font-size: 1.5rem;
-  }
-  
-  .user-info {
-    font-size: 0.9rem;
-  }
-  
-  .login-container {
+  .csv-format-info {
     padding: 1rem;
   }
   
-  .login-header h1 {
-    font-size: 2rem;
+  .csv-input {
+    min-height: 200px;
+    padding: 1rem;
   }
-
-  .search-filter {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row-group {
-    grid-template-columns: 1fr;
-  }
-
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
-  .product-list {
-    grid-template-columns: 1fr;
-  }
-
-  .price-info {
+  
+  .csv-actions {
     flex-direction: column;
-    gap: 0.3rem;
   }
+  
+  .import-button,
+  .clear-button {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .importing-status {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* CSVインポート成功時のアニメーション */
+@keyframes success-flash {
+  0% { background: #e6fffa; }
+  50% { background: #38a169; }
+  100% { background: #e6fffa; }
+}
+
+.csv-import-success {
+  animation: success-flash 0.6s ease-in-out;
 }
