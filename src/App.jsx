@@ -393,8 +393,8 @@ function App() {
                   <div className="price-info">
                     <div>仕入: {product.cost ? `¥${product.cost}` : '未設定'}</div>
                     <div>販売: {product.price ? `¥${product.price}` : '未設定'}</div>
-                    <div className={`profit ${product.profitRate > 50 ? 'high' : product.profitRate > 30 ? 'medium' : 'low'}`}>
-                      利益: {(product.price && product.cost) ? `¥${product.profit} (${product.profitRate.toFixed(1)}%)` : '算出不可'}
+                    <div className={`profit ${(product.profitRate || 0) > 50 ? 'high' : (product.profitRate || 0) > 30 ? 'medium' : 'low'}`}>
+                      利益: {(product.price && product.cost && product.profitRate !== undefined) ? `¥${product.profit} (${product.profitRate.toFixed(1)}%)` : '算出不可'}
                     </div>
                   </div>
 
