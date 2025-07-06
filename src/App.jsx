@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
   const { user, login, logout } = useAuth();
-  const { products, loading, error, addProduct, updateProductStock, deleteProduct } = useProducts();
+  const { products, loading, error, addProduct, updateProductStock, deleteProduct, updateProduct } = useProducts();
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +73,12 @@ function App() {
 
       if (editingProduct) {
         // 編集モード（既存商品の更新）
-        await updateProduct(editingProduct.id, productData);
+        if (updateProduct) {
+          await updateProduct(editingProduct.id, productData);
+        } else {
+          alert('編集機能は現在利用できません');
+          return;
+        }
       } else {
         // 新規追加モード
         await addProduct(productData);
