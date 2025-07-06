@@ -4,8 +4,8 @@ import { useProducts } from './hooks/useProducts';
 import './App.css';
 
 function App() {
-  const { user, loading, signInWithGoogle, logout } = useAuth();
-  const { products, loading, error, addProduct, updateStock, deleteProduct, updateProduct } = useProducts(user);
+  const { user, loading: authLoading, signInWithGoogle, logout } = useAuth();
+  const { products, loading: productsLoading, error, addProduct, updateStock, deleteProduct, updateProduct } = useProducts(user);
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -170,7 +170,7 @@ function App() {
     );
   }
 
-  if (loading) {
+  if (authLoading || productsLoading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
