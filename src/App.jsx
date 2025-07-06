@@ -597,22 +597,131 @@ function AdminDashboard({ user, logout, products, addProduct, updateProduct, del
   );
 }
 
-// 顧客用アプリ
-function CustomerApp({ user, logout, products, updateStock }) {
+// 顧客用アプリ（商品追加機能付き）
+function CustomerApp({ user, logout, products, updateStock, addProduct, updateProduct, deleteProduct }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // 顧客側も泡盛カテゴリに対応
   const categories = [
     'ビール', 
     '日本酒', 
     '焼酎', 
-    '泡盛',           // 新規追加
+    '泡盛',
     'ワイン', 
     'カクテル・チューハイ', 
     'ソフトドリンク',
     'ノンアルコール'
   ];
+
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    manufacturer: '',
+    category: 'ビール',
+    cost: '',
+    price: '',
+    description: '',
+    stock: '',
+    minStock: '',
+    isNomihodai: false
+  });
+
+  const resetForm = () => {
+    setNewProduct({
+      name: '',
+      manufacturer: '',
+      category: 'ビール',
+      cost: '',
+      price: '',
+      description: '',
+      stock: '',
+      minStock: '',
+      isNomihodai: false
+    });
+    setShowAddForm(false);
+    setEditingProduct(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!newProduct.name.trim()) {
+      alert('商品名は必須です');
+      return;
+    }
+
+    try {
+      const productData = {
+        ...newProduct,
+        cost: parseFloat(newProduct.cost) || 0,
+        price: parseFloat(newProduct.price) || 0,
+        stock: parseInt(newProduct.stock) || 0,
+        minStock: parseInt(newProduct.minStock) || 0,
+        profit: (parseFloat(newProduct.price) || 0) - (parseFloat(newProduct.cost) || 0),
+        profitRate: (parseFloat(newProduct.price) && parseFloat(newProduct.cost)) ? 
+          (((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price)) * 100) : 0,
+        isMaster: false, // 顧客追加商品はマスターではない
+        addedBy: user.email, // 追加者を記録
+        createdAt: new Date()
+      };
+
+      if (editingProduct) {
+        // 編集は自分が追加した商品のみ可能
+        await updateProduct(editingProduct.id, productData);
+      } else {
+        await addProduct(productData);
+      }
+      
+      resetForm();
+      alert('商品を追加しました！管理者の確認後、他の店舗でも利用可能になる場合があります。');
+    } catch (error) {
+      console.error('商品追加に失敗しました:', error);
+      alert('商品追加に失敗しました');
+    }
+  };
+
+  const handleEdit = (product) => {
+    // 自分が追加した商品のみ編集可能
+    if (product.addedBy !== user.email && product.isMaster) {
+      alert('マスター商品は編集できません');
+      return;
+    }
+
+    setNewProduct({
+      name: product.name,
+      manufacturer: product.manufacturer || '',
+      category: product.category,
+      cost: product.cost.toString(),
+      price: product.price.toString(),
+      description: product.description || '',
+      stock: product.stock.toString(),
+      minStock: product.minStock.toString(),
+      isNomihodai: product.isNomihodai
+    });
+    setEditingProduct(product);
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    const product = products.find(p => p.id === productId);
+    
+    // 自分が追加した商品のみ削除可能
+    if (product.addedBy !== user.email && product.isMaster) {
+      alert('マスター商品は削除できません');
+      return;
+    }
+
+    if (window.confirm('この商品を削除しますか？')) {
+      try {
+        await deleteProduct(productId);
+      } catch (error) {
+        console.error('商品削除に失敗しました:', error);
+        alert('商品削除に失敗しました');
+      }
+    }
+  };
 
   const handleStockChange = async (productId, change) => {
     try {
@@ -625,9 +734,12 @@ function CustomerApp({ user, logout, products, updateStock }) {
     }
   };
 
-  // 検索・フィルター（マスター商品のみ表示）
+  // 検索・フィルター（マスター商品 + 自分が追加した商品を表示）
   const filteredProducts = products
-    .filter(product => product.isMaster) // マスター商品のみ
+    .filter(product => {
+      // マスター商品 OR 自分が追加した商品
+      return product.isMaster || product.addedBy === user.email;
+    })
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (product.manufacturer && product.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -635,10 +747,12 @@ function CustomerApp({ user, logout, products, updateStock }) {
       return matchesSearch && matchesCategory;
     });
 
-  // 統計計算（顧客の在庫のみ）
-  const totalValue = filteredProducts.reduce((sum, product) => sum + (product.cost * product.stock), 0);
-  const totalProfit = filteredProducts.reduce((sum, product) => sum + (product.profit * product.stock), 0);
-  const lowStockCount = filteredProducts.filter(product => product.stock <= product.minStock && product.stock > 0).length;
+  // 統計計算
+  const myProducts = filteredProducts.filter(p => p.addedBy === user.email || p.isMaster);
+  const totalValue = myProducts.reduce((sum, product) => sum + (product.cost * product.stock), 0);
+  const totalProfit = myProducts.reduce((sum, product) => sum + (product.profit * product.stock), 0);
+  const lowStockCount = myProducts.filter(product => product.stock <= product.minStock && product.stock > 0).length;
+  const myAddedCount = filteredProducts.filter(p => p.addedBy === user.email && !p.isMaster).length;
 
   return (
     <div className="app">
@@ -669,12 +783,12 @@ function CustomerApp({ user, logout, products, updateStock }) {
             <p>{lowStockCount}品目</p>
           </div>
           <div className="stat-card">
-            <h3>商品数</h3>
-            <p>{filteredProducts.length}品目</p>
+            <h3>追加商品</h3>
+            <p>{myAddedCount}品目</p>
           </div>
         </div>
 
-        {/* 検索・フィルター */}
+        {/* 検索・フィルター・商品追加 */}
         <div className="controls">
           <div className="search-filters">
             <input
@@ -696,26 +810,164 @@ function CustomerApp({ user, logout, products, updateStock }) {
               ))}
             </select>
           </div>
+          
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="add-button"
+          >
+            ➕ 新商品追加
+          </button>
         </div>
+
+        {/* 商品追加・編集フォーム */}
+        {showAddForm && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2>{editingProduct ? '商品編集' : '新商品追加'}</h2>
+              <p style={{color: '#718096', marginBottom: '1rem', fontSize: '0.9rem'}}>
+                {editingProduct ? '商品情報を編集できます' : '新しい商品を追加します。管理者の確認後、他店舗でも利用可能になる場合があります。'}
+              </p>
+              
+              <form onSubmit={handleSubmit} className="product-form">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>商品名 *</label>
+                    <input
+                      type="text"
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      placeholder="例：湘南ゴールド 350ml缶"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>メーカー</label>
+                    <input
+                      type="text"
+                      value={newProduct.manufacturer}
+                      onChange={(e) => setNewProduct({...newProduct, manufacturer: e.target.value})}
+                      placeholder="例：地元ブルワリー"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>カテゴリー *</label>
+                    <select
+                      value={newProduct.category}
+                      onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                      required
+                    >
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>仕入れ値 (円)</label>
+                    <input
+                      type="number"
+                      value={newProduct.cost}
+                      onChange={(e) => setNewProduct({...newProduct, cost: e.target.value})}
+                      placeholder="例：200"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>販売価格 (円)</label>
+                    <input
+                      type="number"
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      placeholder="例：580"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>現在在庫</label>
+                    <input
+                      type="number"
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                      placeholder="例：24"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>最小在庫</label>
+                    <input
+                      type="number"
+                      value={newProduct.minStock}
+                      onChange={(e) => setNewProduct({...newProduct, minStock: e.target.value})}
+                      placeholder="例：6"
+                    />
+                  </div>
+
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={newProduct.isNomihodai}
+                        onChange={(e) => setNewProduct({...newProduct, isNomihodai: e.target.checked})}
+                      />
+                      飲み放題対象
+                    </label>
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>商品説明</label>
+                    <textarea
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                      placeholder="例：地元唐津のクラフトビール。柑橘系の爽やかな味わい"
+                      rows="3"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button type="button" onClick={resetForm} className="cancel-button">
+                    キャンセル
+                  </button>
+                  <button type="submit" className="submit-button">
+                    {editingProduct ? '更新' : '追加'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* 在庫一覧 */}
         <div className="products-grid">
           {filteredProducts.length === 0 ? (
             <div className="no-products">
               <p>商品がありません</p>
-              <p>管理者が商品マスターを設定するまでお待ちください</p>
+              <button onClick={() => setShowAddForm(true)} className="add-first-button">
+                最初の商品を追加
+              </button>
             </div>
           ) : (
             filteredProducts.map(product => (
-              <div key={product.id} className="product-card customer-view">
+              <div key={product.id} className={`product-card ${product.isMaster ? 'master-product' : 'my-product'}`}>
                 <div className="product-header">
                   <h3>{product.name}</h3>
                   {product.manufacturer && (
                     <span className="manufacturer">({product.manufacturer})</span>
                   )}
-                  <span className={`category-badge category-${product.category.replace(/[・]/g, '-')}`}>
-                    {product.category}
-                  </span>
+                  
+                  <div className="product-badges">
+                    <span className={`category-badge category-${product.category.replace(/[・]/g, '-')}`}>
+                      {product.category}
+                    </span>
+                    
+                    {product.isMaster ? (
+                      <span className="master-badge">📋 マスター</span>
+                    ) : (
+                      <span className="my-badge">✨ 自分で追加</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="product-info">
@@ -744,12 +996,21 @@ function CustomerApp({ user, logout, products, updateStock }) {
                     </button>
                   </div>
 
-                  {/* 価格情報（顧客にも表示） */}
+                  {/* 価格情報 */}
                   {(product.cost || product.price) && (
                     <div className="price-info-customer">
                       {product.cost && <span>仕入: ¥{product.cost}</span>}
                       {product.price && <span>販売: ¥{product.price}</span>}
+                      {product.profit && (
+                        <span className={`profit ${product.profitRate > 50 ? 'high' : product.profitRate > 30 ? 'medium' : 'low'}`}>
+                          利益: ¥{product.profit} ({product.profitRate.toFixed(1)}%)
+                        </span>
+                      )}
                     </div>
+                  )}
+
+                  {product.isNomihodai && (
+                    <div className="nomihodai-badge">🍻 飲み放題</div>
                   )}
 
                   {product.stock === 0 && (
@@ -761,6 +1022,18 @@ function CustomerApp({ user, logout, products, updateStock }) {
                     </button>
                   )}
                 </div>
+
+                {/* 自分が追加した商品のみ編集・削除可能 */}
+                {(product.addedBy === user.email && !product.isMaster) && (
+                  <div className="product-actions">
+                    <button onClick={() => handleEdit(product)} className="edit-button">
+                      ✏️ 編集
+                    </button>
+                    <button onClick={() => handleDelete(product.id)} className="delete-button">
+                      🗑️ 削除
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -824,6 +1097,9 @@ function App() {
           logout={logout}
           products={products}
           updateStock={updateStock}
+          addProduct={addProduct}
+          updateProduct={updateProduct}
+          deleteProduct={deleteProduct}
         />
       )}
     </>

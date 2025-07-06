@@ -1,254 +1,179 @@
-/* CSVインポート機能用スタイル（App.cssの最後に追加） */
+/* 顧客用新機能追加スタイル（App.cssの最後に追加） */
 
-.csv-import-section {
-  background: linear-gradient(135deg, #f6f9fc 0%, #e9f5ff 100%);
-  padding: 2rem;
-  border-radius: 16px;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e1f5fe;
-  position: relative;
-  overflow: hidden;
-}
-
-.csv-import-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(135deg, #4299e1 0%, #38a169 100%);
-}
-
-.csv-import-section h3 {
-  color: #2d3748;
-  font-size: 1.4rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.csv-import-section > p {
-  color: #4a5568;
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
-}
-
-.csv-format-info {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin: 1.5rem 0;
+/* 商品カードの区別 */
+.product-card.master-product {
   border-left: 4px solid #4299e1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
-.csv-format-info h4 {
-  color: #2d3748;
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
-  font-weight: 600;
+.product-card.my-product {
+  border-left: 4px solid #38a169;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
 }
 
-.csv-format-info pre {
-  font-size: 0.85rem;
-  color: #4a5568;
-  margin: 0;
-  white-space: pre-wrap;
-  line-height: 1.4;
-  font-family: 'Courier New', monospace;
-  background: #f8fafc;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
+/* バッジコンテナ */
+.product-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
-.csv-input {
-  width: 100%;
-  padding: 1.2rem;
-  border: 2px solid #e2e8f0;
+/* マスター商品バッジ */
+.master-badge {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  padding: 0.2rem 0.6rem;
   border-radius: 12px;
-  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+/* 自分で追加商品バッジ */
+.my-badge {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+}
+
+/* 利益表示の改善 */
+.price-info-customer .profit {
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.price-info-customer .profit.high {
+  background: #e6fffa;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.price-info-customer .profit.medium {
+  background: #fef5e7;
+  color: #c05621;
+  border: 1px solid #fed7aa;
+}
+
+.price-info-customer .profit.low {
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+/* 飲み放題バッジの改善 */
+.nomihodai-badge {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 4px rgba(237, 137, 54, 0.3);
+}
+
+/* 商品追加フォームの説明文スタイル */
+.modal-content p {
+  background: #f0f9ff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #0ea5e9;
   font-size: 0.9rem;
-  resize: vertical;
-  min-height: 250px;
-  background: white;
-  transition: all 0.3s ease;
   line-height: 1.5;
 }
 
-.csv-input:focus {
-  outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
-  transform: translateY(-1px);
-}
-
-.csv-input:disabled {
-  background: #f7fafc;
-  color: #a0aec0;
-  cursor: not-allowed;
-}
-
-.csv-input::placeholder {
-  color: #a0aec0;
-  font-style: italic;
-}
-
-.csv-actions {
+/* 検索・フィルター・追加ボタンのレイアウト改善 */
+.controls {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
-.import-button {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+.search-filters {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 追加ボタンのスタイル改善 */
+.add-button {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
   color: white;
   border: none;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 10px;
-  font-weight: 700;
   font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(56, 161, 105, 0.3);
+  white-space: nowrap;
+  min-width: 140px;
 }
 
-.import-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.import-button:hover::before {
-  left: 100%;
-}
-
-.import-button:disabled {
-  background: #a0aec0;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.import-button:hover:not(:disabled) {
+.add-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+  box-shadow: 0 8px 25px rgba(56, 161, 105, 0.4);
 }
 
-.import-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.clear-button {
-  background: #e2e8f0;
-  color: #4a5568;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.clear-button:hover:not(:disabled) {
-  background: #cbd5e0;
-  transform: translateY(-1px);
-}
-
-.clear-button:disabled {
-  background: #f7fafc;
-  color: #a0aec0;
-  cursor: not-allowed;
-}
-
-.importing-status {
+/* 商品アクションボタンの調整 */
+.product-actions {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
-  border-radius: 12px;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-  animation: pulse-import 2s ease-in-out infinite;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
 }
 
-@keyframes pulse-import {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
-  }
+/* ホバー効果の改善 */
+.product-card.master-product:hover {
+  box-shadow: 0 8px 25px rgba(66, 153, 225, 0.15);
 }
 
-.importing-status .loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #a7f3d0;
-  border-left: 3px solid #38a169;
-  margin-bottom: 0;
-}
-
-.importing-status p {
-  margin: 0;
-  font-weight: 600;
-  font-size: 1rem;
+.product-card.my-product:hover {
+  box-shadow: 0 8px 25px rgba(56, 161, 105, 0.15);
 }
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .csv-import-section {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
   }
   
-  .csv-format-info {
-    padding: 1rem;
-  }
-  
-  .csv-input {
-    min-height: 200px;
-    padding: 1rem;
-  }
-  
-  .csv-actions {
+  .search-filters {
     flex-direction: column;
   }
   
-  .import-button,
-  .clear-button {
+  .add-button {
     width: 100%;
-    padding: 1rem;
   }
   
-  .importing-status {
-    padding: 1rem;
+  .product-badges {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
   }
-}
-
-/* CSVインポート成功時のアニメーション */
-@keyframes success-flash {
-  0% { background: #e6fffa; }
-  50% { background: #38a169; }
-  100% { background: #e6fffa; }
-}
-
-.csv-import-success {
-  animation: success-flash 0.6s ease-in-out;
+  
+  .master-badge,
+  .my-badge {
+    align-self: flex-start;
+  }
 }
