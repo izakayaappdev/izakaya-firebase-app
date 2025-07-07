@@ -82,42 +82,59 @@ function App() {
 
       // 選択商品の追加
       if (setupData.selectedProducts && setupData.selectedProducts.length > 0) {
-        console.log(`📦 ${setupData.selectedProducts.length}商品を追加中...`);
+        console.log(`📦 ${setupData.selectedProducts.length}件の商品を追加中...`);
         
-        for (const product of setupData.selectedProducts) {
-          await addProduct(product);
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const productData of setupData.selectedProducts) {
+          try {
+            const result = await addProduct({
+              ...productData,
+              isMaster: false,
+              addedBy: user.email,
+              createdAt: new Date()
+            });
+
+            if (result.success) {
+              successCount++;
+            } else {
+              errorCount++;
+              console.warn('商品追加失敗:', productData.name, result.error);
+            }
+          } catch (error) {
+            errorCount++;
+            console.error('商品追加エラー:', productData.name, error);
+          }
         }
+
+        console.log(`✅ 商品追加完了: 成功${successCount}件, 失敗${errorCount}件`);
         
-        addToast(`${setupData.selectedProducts.length}商品を追加しました！`, 'success');
+        if (successCount > 0) {
+          console.log(`${successCount}件の商品を追加しました`);
+        }
+        if (errorCount > 0) {
+          console.log(`${errorCount}件の商品追加に失敗しました`);
+        }
       }
 
+      console.log('初期設定が完了しました');
       setShowInitialSetup(false);
-      addToast('初期設定が完了しました！', 'success');
-      
+
     } catch (error) {
-      console.error('初期設定完了エラー:', error);
-      addToast('初期設定の保存に失敗しました', 'error');
+      console.error('初期設定エラー:', error);
+      console.log('初期設定に失敗しました');
     }
   };
 
-  // ログインしていない場合
-  if (!user) {
-    return (
-      <>
-        <LoginScreen onLogin={signInWithGoogle} />
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
-      </>
-    );
+  // 認証中の表示
+  if (authLoading) {
+    return <LoadingScreen />;
   }
 
-  // ローディング中
-  if (authLoading || profileLoading) {
-    return (
-      <>
-        <LoadingScreen />
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
-      </>
-    );
+  // 未ログイン時の表示
+  if (!user) {
+    return <LoginScreen onLogin={signInWithGoogle} />;
   }
 
   // 初期設定が必要な場合
@@ -125,35 +142,47 @@ function App() {
     return (
       <>
         <InitialSetup 
-          user={user} 
-          onComplete={handleSetupComplete} 
-          addToast={addToast} 
+          user={user}
+          onComplete={handleSetupComplete}
+          addToast={addToast}
         />
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <ToastContainer 
+          toasts={toasts}
+          removeToast={removeToast}
+        />
       </>
     );
   }
 
-  // 管理者判定
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  // プロフィール読み込み中
+  if (profileLoading) {
+    return <LoadingScreen />;
+  }
+
+  // 管理者・顧客判定
+  const isAdmin = user.email === ADMIN_EMAIL;
 
   return (
     <div className="app">
       {isAdmin ? (
         <AdminDashboard 
-          user={user} 
-          logout={logout} 
-          addToast={addToast} 
+          user={user}
+          logout={logout}
+          addToast={addToast}
         />
       ) : (
         <CustomerApp 
-          user={user} 
-          logout={logout} 
-          addToast={addToast}
+          user={user}
           profile={profile}
+          logout={logout}
+          addToast={addToast}
         />
       )}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      
+      <ToastContainer 
+        toasts={toasts}
+        removeToast={removeToast}
+      />
     </div>
   );
 }

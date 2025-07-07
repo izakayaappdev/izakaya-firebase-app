@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
 
-// 10カテゴリー対応（仕様書v4.2準拠）
-const categories = [
-  'ビール',
-  'カクテル・チューハイ', 
-  '日本酒',
-  '焼酎',
-  'ウイスキー・ブランデー',
-  'ワイン',
-  'シャンパン・スパークリング',
-  '泡盛',
-  'ソフトドリンク',
-  'ノンアルコール'
-];
-
-// 新商品追加タブ（サジェスト機能付き）
+// 新商品追加タブ（商品コード非表示・簡潔版）
 function AddProductTab({ 
-  addProduct, 
+  onAddProduct,
   generateProductCode, 
   addToast,
-  products
+  products,
+  allProducts  // ✅ 検索用：自分の商品 + マスター商品
 }) {
+  // generateProductCode が undefined の場合のフォールバック関数
+  const fallbackGenerateProductCode = () => {
+    const searchProducts = allProducts || products || [];
+    const existingCodes = searchProducts
+      .map(p => p.productCode)
+      .filter(code => code && code.startsWith('PROD'))
+      .map(code => {
+        const num = parseInt(code.replace('PROD', ''));
+        return isNaN(num) ? 0 : num;
+      });
+    
+    const maxNum = Math.max(0, ...existingCodes);
+    return `PROD${String(maxNum + 1).padStart(3, '0')}`;
+  };
+
+  const safeGenerateProductCode = generateProductCode || fallbackGenerateProductCode;
   const [newProduct, setNewProduct] = useState({
     name: '',
     manufacturer: '',
@@ -28,7 +31,6 @@ function AddProductTab({
     stock: '',
     minStock: '',
     description: '',
-    productCode: '',
     volume: '',
     volumeUnit: 'ml',
     isNomihodai: false,
@@ -47,7 +49,6 @@ function AddProductTab({
       stock: '',
       minStock: '',
       description: '',
-      productCode: '',
       volume: '',
       volumeUnit: 'ml',
       isNomihodai: false,
@@ -62,8 +63,9 @@ function AddProductTab({
     setNewProduct({...newProduct, name: value});
     
     if (value.trim().length >= 2) {
-      // 類似商品を検索（商品名とメーカー名から）
-      const searchResults = products.filter(product => 
+      // ✅ allProducts（自分の商品 + マスター商品）から検索
+      const searchProducts = allProducts || products || [];
+      const searchResults = searchProducts.filter(product => 
         product.name.toLowerCase().includes(value.toLowerCase()) ||
         (product.manufacturer && product.manufacturer.toLowerCase().includes(value.toLowerCase()))
       ).slice(0, 5); // 最大5件
@@ -85,7 +87,6 @@ function AddProductTab({
       stock: '',
       minStock: product.minStock.toString(),
       description: product.description || '',
-      productCode: '', // 新しい商品コードを生成
       volume: product.volume?.toString() || '',
       volumeUnit: product.volumeUnit || 'ml',
       isNomihodai: product.isNomihodai || false,
@@ -117,7 +118,8 @@ function AddProductTab({
     }
 
     // 重複チェック
-    const duplicateProduct = products.find(product => 
+    const searchProducts = allProducts || products || [];
+    const duplicateProduct = searchProducts.find(product => 
       product.name.toLowerCase() === newProduct.name.toLowerCase() &&
       product.manufacturer?.toLowerCase() === newProduct.manufacturer.toLowerCase()
     );
@@ -131,6 +133,8 @@ function AddProductTab({
     try {
       const productData = {
         ...newProduct,
+        // ✅ 安全な商品コード生成
+        productCode: safeGenerateProductCode(),
         cost: 0, // 仕入値は設定しない
         price: 0, // 販売価格は設定しない
         stock: parseInt(newProduct.stock) || 0,
@@ -141,7 +145,7 @@ function AddProductTab({
         isActive: true // デフォルトでアクティブ
       };
 
-      const result = await addProduct(productData);
+      const result = await onAddProduct(productData);  // ← onAddProduct に変更
       if (result.success) {
         addToast(`${newProduct.name}を追加しました！`, 'success');
         resetForm();
@@ -154,26 +158,21 @@ function AddProductTab({
     }
   };
 
-  const handleGenerateProductCode = () => {
-    const autoCode = generateProductCode();
-    setNewProduct({...newProduct, productCode: autoCode});
-  };
-
   return (
     <div className="add-product-section">
       <h2>新商品追加</h2>
       <p className="form-note">
-        ℹ️ 追加された商品は管理者の確認後、他の店舗でも利用可能になります
+        登録されていない商品もご登録できます！
       </p>
       
-      <form onSubmit={handleSubmit} className="product-form">
-        <div className="form-grid">
-          {/* 商品名入力（サジェスト機能付き） */}
-          <div className="form-group">
-            <label>商品名 *</label>
-            <div className="name-input-container">
+      <form onSubmit={handleSubmit} className="add-product-form">
+        <div className="add-product-form-grid">{/* 商品名入力（サジェスト機能付き） */}
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">商品名 *</label>
+            <div className="add-product-name-input-container">
               <input
                 type="text"
+                className="add-product-form-input"
                 value={newProduct.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="例：スーパードライ"
@@ -183,19 +182,19 @@ function AddProductTab({
               
               {/* サジェスト表示 */}
               {showSuggestions && suggestions.length > 0 && (
-                <div className="suggestions-dropdown">
+                <div className="add-product-suggestions-dropdown">
                   {suggestions.map(product => (
                     <div 
                       key={product.id} 
-                      className="suggestion-item"
+                      className="add-product-suggestion-item"
                       onClick={() => selectFromSuggestion(product)}
                     >
-                      <div className="suggestion-main">
+                      <div className="add-product-suggestion-main">
                         <strong>{product.name}</strong>
                         {product.manufacturer && <span> - {product.manufacturer}</span>}
                       </div>
-                      <div className="suggestion-details">
-                        <span className="category-badge">{product.category}</span>
+                      <div className="add-product-suggestion-details">
+                        <span className="add-product-category-badge">{product.category}</span>
                       </div>
                     </div>
                   ))}
@@ -204,94 +203,86 @@ function AddProductTab({
             </div>
           </div>
 
-          <div className="form-group">
-            <label>メーカー</label>
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">メーカー</label>
             <input
               type="text"
+              className="add-product-form-input"
               value={newProduct.manufacturer}
               onChange={(e) => setNewProduct({...newProduct, manufacturer: e.target.value})}
               placeholder="例：アサヒビール"
             />
           </div>
 
-          <div className="form-group">
-            <label>カテゴリー *</label>
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">カテゴリ *</label>
             <select
+              className="add-product-form-select"
               value={newProduct.category}
               onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
               required
             >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
+              <option value="ビール">ビール</option>
+              <option value="カクテル・チューハイ">カクテル・チューハイ</option>
+              <option value="日本酒">日本酒</option>
+              <option value="焼酎">焼酎</option>
+              <option value="ウイスキー・ブランデー">ウイスキー・ブランデー</option>
+              <option value="ワイン">ワイン</option>
+              <option value="シャンパン・スパークリング">シャンパン・スパークリング</option>
+              <option value="泡盛">泡盛</option>
+              <option value="ソフトドリンク">ソフトドリンク</option>
+              <option value="ノンアルコール">ノンアルコール</option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label>商品コード</label>
-            <div className="product-code-input">
+          {/* 容量設定 */}
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">容量</label>
+            <div className="add-product-volume-input-row">
               <input
-                type="text"
-                value={newProduct.productCode}
-                onChange={(e) => setNewProduct({...newProduct, productCode: e.target.value})}
-                placeholder="例：PROD001"
+                type="number"
+                className="add-product-form-input"
+                value={newProduct.volume}
+                onChange={(e) => setNewProduct({...newProduct, volume: e.target.value})}
+                placeholder="例：350"
               />
-              <button
-                type="button"
-                onClick={handleGenerateProductCode}
-                className="generate-code-button"
+              <select
+                className="add-product-form-select"
+                value={newProduct.volumeUnit}
+                onChange={(e) => setNewProduct({...newProduct, volumeUnit: e.target.value})}
               >
-                自動生成
-              </button>
+                <option value="ml">ml</option>
+                <option value="L">L</option>
+              </select>
             </div>
           </div>
 
-          <div className="form-group">
-            <label>容量</label>
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">現在在庫</label>
             <input
               type="number"
-              value={newProduct.volume}
-              onChange={(e) => setNewProduct({...newProduct, volume: e.target.value})}
-              placeholder="例：350"
-              min="0"
-              step="0.1"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>容量単位</label>
-            <select
-              value={newProduct.volumeUnit}
-              onChange={(e) => setNewProduct({...newProduct, volumeUnit: e.target.value})}
-            >
-              <option value="ml">ml</option>
-              <option value="L">L</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>現在在庫</label>
-            <input
-              type="number"
+              className="add-product-form-input"
               value={newProduct.stock}
               onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
               placeholder="例：80"
             />
           </div>
 
-          <div className="form-group">
-            <label>最小在庫</label>
+          <div className="add-product-form-group">
+            <label className="add-product-form-label">最小在庫</label>
             <input
               type="number"
+              className="add-product-form-input"
               value={newProduct.minStock}
               onChange={(e) => setNewProduct({...newProduct, minStock: e.target.value})}
               placeholder="例：20"
             />
           </div>
 
-          <div className="form-group full-width">
-            <label>商品説明</label>
+          <div className="add-product-form-group add-product-full-width">
+            <label className="add-product-form-label">商品説明</label>
             <textarea
+              className="add-product-form-textarea"
               value={newProduct.description}
               onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
               placeholder="例：キリッとした辛口。夏におすすめ"
@@ -299,10 +290,12 @@ function AddProductTab({
             />
           </div>
 
-          <div className="form-group checkbox-group">
-            <label>
+          {/* 飲み放題対象チェックボックス（中央寄せ） */}
+          <div className="add-product-checkbox-group add-product-checkbox-center">
+            <label className="add-product-checkbox-label">
               <input
                 type="checkbox"
+                className="add-product-checkbox-input"
                 checked={newProduct.isNomihodai}
                 onChange={(e) => setNewProduct({...newProduct, isNomihodai: e.target.checked})}
               />
@@ -311,11 +304,11 @@ function AddProductTab({
           </div>
         </div>
 
-        <div className="form-actions">
-          <button type="button" onClick={resetForm} className="cancel-button">
+        <div className="add-product-form-actions">
+          <button type="button" onClick={resetForm} className="add-product-cancel-button">
             リセット
           </button>
-          <button type="submit" className="submit-button">
+          <button type="submit" className="add-product-submit-button">
             商品追加
           </button>
         </div>

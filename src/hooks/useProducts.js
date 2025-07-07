@@ -7,22 +7,29 @@ import {
   deleteDoc, 
   onSnapshot,
   query,
-  orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
+// 管理者UID（固定）
+const ADMIN_UID = 'slK7PLeu3lMnP5vE2MqytkKhiW13';
+
 export const useProducts = (user) => {
   const [products, setProducts] = useState([]);
+  const [masterProducts, setMasterProducts] = useState([]); // マスター商品用
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // productsRef をuseEffect外で定義（userがある場合のみ）
-  const productsRef = user ? collection(db, 'users', user.uid, 'products') : null;
+  const productsRef = user?.uid ? collection(db, 'users', user.uid, 'products') : null;
+  const masterProductsRef = collection(db, 'users', ADMIN_UID, 'products');
+
+  // マスター商品を含む全商品（検索用）
+  const allProducts = [...products, ...masterProducts];
 
   // 商品コード自動採番
   const generateProductCode = () => {
-    const existingCodes = products
+    const existingCodes = allProducts
       .map(p => p.productCode)
       .filter(code => code && code.startsWith('PROD'))
       .map(code => {
@@ -36,21 +43,19 @@ export const useProducts = (user) => {
 
   // 商品コード重複チェック
   const isProductCodeDuplicate = (productCode, excludeId = null) => {
-    return products.some(p => 
+    return allProducts.some(p => 
       p.productCode === productCode && p.id !== excludeId
     );
   };
 
-  // リアルタイム同期
+  // 自分の商品のリアルタイム同期
   useEffect(() => {
-    if (!user || !productsRef) {
+    if (!user?.uid || !productsRef) {
       setProducts([]);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    const q = query(productsRef, orderBy('createdAt', 'desc'));
+    const q = query(productsRef);
     
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
@@ -61,23 +66,57 @@ export const useProducts = (user) => {
             ...doc.data()
           });
         });
+        
+        // クライアントサイドでソート
+        productsData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         setProducts(productsData);
-        setLoading(false);
         setError(null);
       },
       (error) => {
-        console.error('Firestore同期エラー:', error);
+        console.error('自分の商品同期エラー:', error);
         setError(error.message);
-        setLoading(false);
       }
     );
 
     return () => unsubscribe();
   }, [user?.uid]);
 
+  // マスター商品のリアルタイム同期
+  useEffect(() => {
+    const q = query(masterProductsRef);
+    
+    const unsubscribe = onSnapshot(q, 
+      (querySnapshot) => {
+        const masterData = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          // isMaster が true の商品のみ取得
+          if (data.isMaster === true) {
+            masterData.push({
+              id: doc.id,
+              ...data
+            });
+          }
+        });
+        
+        // クライアントサイドでソート
+        masterData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        setMasterProducts(masterData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('マスター商品同期エラー:', error);
+        setError(error.message);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   // 商品追加
   const addProduct = async (productData) => {
-    if (!user || !productsRef) {
+    if (!user?.uid || !productsRef) {
       return { success: false, error: 'ユーザーがログインしていません' };
     }
 
@@ -99,6 +138,12 @@ export const useProducts = (user) => {
         minStock: Number(productData.minStock || 0),
         volume: Number(productData.volume || 0),
         volumeUnit: productData.volumeUnit || 'ml',
+        profit: Number(productData.profit || 0),
+        profitRate: Number(productData.profitRate || 0),
+        isMaster: Boolean(productData.isMaster || false),
+        isPopular: Boolean(productData.isPopular || false),
+        isActive: Boolean(productData.isActive !== false), // デフォルトtrue
+        isNomihodai: Boolean(productData.isNomihodai || false),
         addedBy: user.email,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -115,7 +160,7 @@ export const useProducts = (user) => {
 
   // 商品更新
   const updateProduct = async (productId, updateData) => {
-    if (!user) {
+    if (!user?.uid) {
       return { success: false, error: 'ユーザーがログインしていません' };
     }
 
@@ -159,7 +204,7 @@ export const useProducts = (user) => {
 
   // 商品削除
   const deleteProduct = async (productId) => {
-    if (!user) {
+    if (!user?.uid) {
       return { success: false, error: 'ユーザーがログインしていません' };
     }
 
@@ -174,61 +219,27 @@ export const useProducts = (user) => {
     }
   };
 
-  // 在庫数更新（よく使う機能なので専用関数）
-  const updateStock = async (productId, newStock) => {
-    return await updateProduct(productId, { 
-      stock: Math.max(0, Number(newStock))
-    });
-  };
-
-  // localStorageからFirestoreへの移行
-  const migrateFromLocalStorage = async () => {
-    try {
-      const localData = localStorage.getItem('stockapp-products');
-      if (!localData) return { success: true, message: 'ローカルデータなし' };
-
-      const localProducts = JSON.parse(localData);
-      console.log(`${localProducts.length}件のローカルデータを移行中...`);
-
-      // 既存のFirestoreデータを確認
-      if (products.length > 0) {
-        const confirm = window.confirm(
-          `Firestoreに既に${products.length}件のデータがあります。\n` +
-          `ローカルデータ${localProducts.length}件を追加しますか？`
-        );
-        if (!confirm) return { success: false, message: 'ユーザーによりキャンセル' };
-      }
-
-      // バッチで移行
-      const promises = localProducts.map(product => {
-        const { id, addedAt, ...productData } = product; // Firestore用にidを除去
-        return addProduct(productData);
-      });
-
-      await Promise.all(promises);
-
-      // 移行完了後、localStorageをクリア
-      localStorage.removeItem('stockapp-products');
-      
-      return { 
-        success: true, 
-        message: `${localProducts.length}件のデータを正常に移行しました` 
-      };
-    } catch (error) {
-      console.error('データ移行エラー:', error);
-      return { success: false, error: error.message };
+  // 在庫更新（専用関数）
+  const updateStock = async (productId, stockChange) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+      return { success: false, error: '商品が見つかりません' };
     }
+
+    const newStock = Math.max(0, (product.stock || 0) + stockChange);
+    return await updateProduct(productId, { stock: newStock });
   };
 
   return {
     products,
+    masterProducts,
+    allProducts, // 検索用：自分の商品 + マスター商品
     loading,
     error,
     addProduct,
     updateProduct,
     deleteProduct,
     updateStock,
-    migrateFromLocalStorage,
     generateProductCode,
     isProductCodeDuplicate
   };

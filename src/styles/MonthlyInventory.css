@@ -1,0 +1,769 @@
+/* ==========================================
+   MonthlyInventory.css - 月末在庫管理専用（競合絶対回避版）
+   全てのクラス名を tanaoroshi- プレフィックスで統一
+   ========================================== */
+
+/* === 基本レイアウト === */
+.monthly-inventory {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* === タブナビゲーション === */
+.monthly-inventory .monthly-inventory-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+}
+
+.monthly-inventory .tab-btn {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.monthly-inventory .tab-btn:hover {
+  color: #374151;
+  background: #f9fafb;
+}
+
+.monthly-inventory .tab-btn.active {
+  color: #059669;
+  border-bottom-color: #059669;
+  background: #ecfdf5;
+}
+
+/* === セクション共通 === */
+.monthly-inventory .current-inventory,
+.monthly-inventory .tanaoroshi-history,
+.monthly-inventory .tanaoroshi-reports {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === 棚卸し実施 === */
+.monthly-inventory .tanaoroshi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-header h3 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.3rem;
+}
+
+.monthly-inventory .tanaoroshi-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.monthly-inventory .tanaoroshi-date-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.monthly-inventory .tanaoroshi-save-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+.monthly-inventory .tanaoroshi-save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+.monthly-inventory .tanaoroshi-save-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* === 概要統計 === */
+.monthly-inventory .tanaoroshi-summary {
+  margin-bottom: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-summary-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.monthly-inventory .tanaoroshi-summary-card h4,
+.monthly-inventory .tanaoroshi-summary-card h5 {
+  margin: 0 0 0.75rem 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.monthly-inventory .tanaoroshi-value {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.monthly-inventory .tanaoroshi-value.positive {
+  color: #059669;
+}
+
+.monthly-inventory .tanaoroshi-value.negative {
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-large-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+/* === 商品一覧 === */
+.monthly-inventory .tanaoroshi-items {
+  margin-bottom: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-items-header h4 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.monthly-inventory .tanaoroshi-filter-summary {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.monthly-inventory .tanaoroshi-filter-summary span {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.monthly-inventory .tanaoroshi-filter-summary .accurate {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthly-inventory .tanaoroshi-filter-summary .over {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.monthly-inventory .tanaoroshi-filter-summary .short {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-item {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.monthly-inventory .tanaoroshi-item.accurate {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
+}
+
+.monthly-inventory .tanaoroshi-item.over {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.monthly-inventory .tanaoroshi-item.short {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.monthly-inventory .tanaoroshi-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.monthly-inventory .tanaoroshi-item-header h5 {
+  margin: 0;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.monthly-inventory .tanaoroshi-category {
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* カテゴリ別統一色 */
+.monthly-inventory .tanaoroshi-category[data-category="ビール"] { 
+  background: #f59e0b;
+}
+.monthly-inventory .tanaoroshi-category[data-category="カクテル・チューハイ"] { 
+  background: #10b981;
+}
+.monthly-inventory .tanaoroshi-category[data-category="日本酒"] { 
+  background: #22c55e;
+}
+.monthly-inventory .tanaoroshi-category[data-category="焼酎"] { 
+  background: #8b5cf6;
+}
+.monthly-inventory .tanaoroshi-category[data-category="ウイスキー・ブランデー"] { 
+  background: #a16207;
+}
+.monthly-inventory .tanaoroshi-category[data-category="ワイン"] { 
+  background: #dc2626;
+}
+.monthly-inventory .tanaoroshi-category[data-category="シャンパン・スパークリング"] { 
+  background: #eab308;
+}
+.monthly-inventory .tanaoroshi-category[data-category="泡盛"] { 
+  background: #ec4899;
+}
+.monthly-inventory .tanaoroshi-category[data-category="ソフトドリンク"] { 
+  background: #3b82f6;
+}
+.monthly-inventory .tanaoroshi-category[data-category="ノンアルコール"] { 
+  background: #6b7280;
+}
+
+.monthly-inventory .tanaoroshi-stock-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.monthly-inventory .tanaoroshi-stock-row,
+.monthly-inventory .tanaoroshi-difference-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.monthly-inventory .tanaoroshi-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.monthly-inventory .tanaoroshi-system-stock {
+  font-weight: 600;
+  color: #374151;
+  background: #f8fafc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.monthly-inventory .tanaoroshi-stock-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.monthly-inventory .tanaoroshi-stock-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.monthly-inventory .tanaoroshi-stock-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.monthly-inventory .tanaoroshi-stock-btn:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.monthly-inventory .tanaoroshi-stock-btn.minus {
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-stock-btn.plus {
+  color: #059669;
+}
+
+.monthly-inventory .tanaoroshi-actual-input {
+  width: 60px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.monthly-inventory .tanaoroshi-actual-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.monthly-inventory .tanaoroshi-difference {
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.monthly-inventory .tanaoroshi-difference.positive {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.monthly-inventory .tanaoroshi-difference.negative {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-difference small {
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* === 棚卸し履歴 === */
+.monthly-inventory .tanaoroshi-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-history-header h3 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.3rem;
+}
+
+.monthly-inventory .tanaoroshi-generate-report-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.monthly-inventory .tanaoroshi-generate-report-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.monthly-inventory .tanaoroshi-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-no-history {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.monthly-inventory .tanaoroshi-no-history p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-history-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.monthly-inventory .tanaoroshi-history-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.monthly-inventory .tanaoroshi-history-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.monthly-inventory .tanaoroshi-date {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.monthly-inventory .tanaoroshi-accuracy {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.monthly-inventory .tanaoroshi-accuracy.excellent {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthly-inventory .tanaoroshi-accuracy.good {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.monthly-inventory .tanaoroshi-accuracy.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.monthly-inventory .tanaoroshi-history-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.monthly-inventory .tanaoroshi-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.monthly-inventory .tanaoroshi-stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.monthly-inventory .tanaoroshi-stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.monthly-inventory .tanaoroshi-stat-value.positive {
+  color: #059669;
+}
+
+.monthly-inventory .tanaoroshi-stat-value.negative {
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown span {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown .accurate {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown .over {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown .short {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.monthly-inventory .tanaoroshi-history-breakdown .significant {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* === 月次レポート === */
+.monthly-inventory .tanaoroshi-reports-header {
+  margin-bottom: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-reports-header h3 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.3rem;
+}
+
+.monthly-inventory .tanaoroshi-report-content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-report-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.monthly-inventory .tanaoroshi-report-header h4 {
+  margin: 0 0 0.75rem 0;
+  color: #374151;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.monthly-inventory .tanaoroshi-report-meta {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.monthly-inventory .tanaoroshi-report-summary {
+  margin-bottom: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-recommendations {
+  margin-top: 2rem;
+}
+
+.monthly-inventory .tanaoroshi-recommendations h5 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.monthly-inventory .tanaoroshi-recommendation {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.monthly-inventory .tanaoroshi-recommendation.warning {
+  background: #fefbf3;
+  border-left-color: #f59e0b;
+}
+
+.monthly-inventory .tanaoroshi-recommendation.error {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.monthly-inventory .tanaoroshi-recommendation.info {
+  background: #f0f9ff;
+  border-left-color: #3b82f6;
+}
+
+.monthly-inventory .tanaoroshi-rec-header {
+  margin-bottom: 0.5rem;
+}
+
+.monthly-inventory .tanaoroshi-recommendation p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.monthly-inventory .tanaoroshi-no-report {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+/* === レスポンシブ対応 === */
+@media (max-width: 1024px) {
+  .monthly-inventory .tanaoroshi-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .monthly-inventory .tanaoroshi-items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .monthly-inventory .tanaoroshi-history-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .monthly-inventory {
+    padding: 0 0.5rem;
+  }
+  
+  .monthly-inventory .monthly-inventory-tabs {
+    overflow-x: auto;
+    gap: 0;
+  }
+  
+  .monthly-inventory .tab-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    min-width: 120px;
+  }
+  
+  .monthly-inventory .tanaoroshi-header,
+  .monthly-inventory .tanaoroshi-history-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-controls {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .monthly-inventory .tanaoroshi-summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .monthly-inventory .tanaoroshi-value {
+    font-size: 1.5rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-items-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .monthly-inventory .tanaoroshi-filter-summary {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .monthly-inventory .tanaoroshi-item {
+    padding: 0.75rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-history-header-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .monthly-inventory .tanaoroshi-report-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-large-value {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .monthly-inventory .tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    min-width: 100px;
+  }
+  
+  .monthly-inventory .tanaoroshi-summary-card {
+    padding: 1rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-value {
+    font-size: 1.3rem;
+  }
+  
+  .monthly-inventory .tanaoroshi-actual-input {
+    width: 50px;
+  }
+  
+  .monthly-inventory .tanaoroshi-large-value {
+    font-size: 1.5rem;
+  }
+}
