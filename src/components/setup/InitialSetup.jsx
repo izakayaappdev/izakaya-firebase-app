@@ -499,11 +499,23 @@ function InitialSetup({ user, onComplete, addToast }) {
 
   // Step 3: 商品選択（新フロー）
   if (currentStep === 3) {
+    // selectedCategoriesの範囲チェック
+    if (currentCategoryIndex >= selectedCategories.length) {
+      console.error('currentCategoryIndex out of range:', currentCategoryIndex, selectedCategories.length);
+      return null;
+    }
+
     // ビール容器別商品選択またはカテゴリー別商品選択
     const currentCategory = selectedCategories[currentCategoryIndex];
     
+    // currentCategoryがundefinedの場合の処理
+    if (!currentCategory) {
+      console.error('currentCategory is undefined:', currentCategoryIndex, selectedCategories);
+      return null;
+    }
+
     // ビールカテゴリーで容器未選択の場合は自動的に容器選択画面を表示
-    if (currentCategory === 'ビール' && selectedBeerContainers.length === 0) {
+    if (currentCategory === 'ビール' && selectedBeerContainers.length === 0 && !showBeerContainerSelection) {
       setShowBeerContainerSelection(true);
     }
 
