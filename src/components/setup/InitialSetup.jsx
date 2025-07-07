@@ -65,10 +65,10 @@ function InitialSetup({ user, onComplete, addToast }) {
         const product = { id: doc.id, ...doc.data() };
         const category = product.category;
         
-        // ✅ 定番商品フラグとマスターフラグの確認
+        // 定番商品フラグとマスターフラグの確認
         console.log(`商品: ${product.name}, isMaster: ${product.isMaster}, isPopular: ${product.isPopular}, カテゴリー: ${category}, 容器: ${product.container}`);
         
-        // ✅ 初期設定では定番商品（isPopular: true）のみ表示
+        // 初期設定では定番商品 (isPopular: true) のみ表示
         if (category && product.name && product.isPopular === true) {
           if (!products[category]) {
             products[category] = [];
@@ -87,7 +87,7 @@ function InitialSetup({ user, onComplete, addToast }) {
       Object.entries(products).forEach(([category, items]) => {
         console.log(`  - ${category}: ${items.length}商品`);
         
-        // ✅ ビールの場合は容器別の内訳も表示
+        // ビールの場合は容器別の内訳も表示
         if (category === 'ビール') {
           const containerCounts = {};
           items.forEach(item => {
@@ -112,42 +112,6 @@ function InitialSetup({ user, onComplete, addToast }) {
     } finally {
       setLoadingProducts(false);
     }
-  };の商品は全てマスター商品として扱う（isMasterがなくても）
-        if (category && product.name) {
-          if (!products[category]) {
-            products[category] = [];
-          }
-          products[category].push(product);
-          totalProducts++;
-        }
-      });
-      
-      setMasterProducts(products);
-      console.log('✅ マスター商品取得完了:', Object.keys(products).length, 'カテゴリー');
-      console.log('📋 取得カテゴリー:', Object.keys(products));
-      console.log('📦 総商品数:', totalProducts);
-      
-      // 各カテゴリーの商品数をログ出力
-      Object.entries(products).forEach(([category, items]) => {
-        console.log(`  - ${category}: ${items.length}商品`);
-      });
-      
-      // ❌ トースト削除：データ取得は正常な処理なのでトースト不要
-      if (Object.keys(products).length === 0) {
-        console.log('⚠️ マスター商品が0件でした - 管理者にお問い合わせください');
-      } else {
-        console.log(`✅ ${Object.keys(products).length}カテゴリーの商品を読み込みました`);
-      }
-      
-    } catch (error) {
-      console.error('❌ マスター商品取得エラー:', error);
-      console.error('❌ エラー詳細:', error.message);
-      // ❌ エラー時のトーストも削除：ネットワークエラー等でユーザーを煩わせない
-      console.error('商品データの読み込みに失敗しました');
-      setMasterProducts({});
-    } finally {
-      setLoadingProducts(false);
-    }
   };
 
   // コンポーネントマウント時にマスター商品を取得
@@ -162,7 +126,6 @@ function InitialSetup({ user, onComplete, addToast }) {
     e.preventDefault();
     
     if (!shopInfo.shopName.trim()) {
-      // ✅ このトーストは残す：必須項目の入力促進
       addToast('店舗名を教えてください！', 'error');
       return;
     }
@@ -190,7 +153,7 @@ function InitialSetup({ user, onComplete, addToast }) {
       return;
     }
     
-    // ✅ ビールが選択されている場合は最優先で処理するようにソート
+    // ビールが選択されている場合は最優先で処理するようにソート
     const sortedCategories = [...selectedCategories].sort((a, b) => {
       if (a === 'ビール') return -1;  // ビールを最初に
       if (b === 'ビール') return 1;   // ビールを最初に
@@ -272,7 +235,6 @@ function InitialSetup({ user, onComplete, addToast }) {
 
   const handleBeerContainerNext = () => {
     if (selectedBeerContainers.length === 0) {
-      // ❌ トースト削除：ユーザーは画面を見て分かるためトースト不要
       console.log('⚠️ 少なくとも1つの容器を選択してください');
       return;
     }
@@ -396,17 +358,15 @@ function InitialSetup({ user, onComplete, addToast }) {
       // onComplete関数の安全な実行
       if (typeof onComplete === 'function') {
         await onComplete(setupData);
-        // ✅ このトーストは残す：設定完了の最終確認
+        // このトーストは残す：設定完了の最終確認
         addToast('ご登録ありがとうございます！', 'success');
       } else {
         console.error('onComplete関数が正しく渡されていません');
-        // ❌ エラー系トーストも削除：開発者向けエラーはコンソールで十分
         console.error('設定完了処理が実行できませんでした');
       }
       
     } catch (error) {
       console.error('初期設定エラー:', error);
-      // ❌ エラー系トーストも削除：詳細エラーはコンソールで確認
       console.error(`設定の保存に失敗しました: ${error.message}`);
     } finally {
       setLoading(false);
@@ -539,6 +499,18 @@ function InitialSetup({ user, onComplete, addToast }) {
 
   // Step 3: 商品選択（新フロー）
   if (currentStep === 3) {
+    // ビール容器別商品選択またはカテゴリー別商品選択
+    const currentCategory = selectedCategories[currentCategoryIndex];
+    
+    // ビールカテゴリーで容器未選択の場合は自動的に容器選択画面を表示
+    if (currentCategory === 'ビール' && selectedBeerContainers.length === 0) {
+      setShowBeerContainerSelection(true);
+    }
+
+    let currentProducts = [];
+    let selectionKey = currentCategory;
+    let displayTitle = currentCategory;
+
     // ビール容器選択画面
     if (showBeerContainerSelection) {
       return (
@@ -554,7 +526,7 @@ function InitialSetup({ user, onComplete, addToast }) {
 
             <div className="beer-container-selection">
               <div className="container-options">
-                {['樽', '瓶', '缶'].map(container => (
+                {['生樽', '瓶', '缶'].map(container => (
                   <div
                     key={container}
                     className={`container-card ${selectedBeerContainers.includes(container) ? 'selected' : ''}`}
@@ -582,18 +554,6 @@ function InitialSetup({ user, onComplete, addToast }) {
         </div>
       );
     }
-
-    // ビール容器別商品選択またはカテゴリー別商品選択
-    const currentCategory = selectedCategories[currentCategoryIndex];
-    
-    // ✅ ビールカテゴリーで容器未選択の場合は自動的に容器選択画面を表示
-    if (currentCategory === 'ビール' && selectedBeerContainers.length === 0) {
-      setShowBeerContainerSelection(true);
-    }
-
-    let currentProducts = [];
-    let selectionKey = currentCategory;
-    let displayTitle = currentCategory;
 
     if (currentCategory === 'ビール' && selectedBeerContainers.length > 0) {
       const currentContainer = selectedBeerContainers[currentBeerContainerIndex];
@@ -664,7 +624,6 @@ function InitialSetup({ user, onComplete, addToast }) {
                 スキップ
               </button>
               <button onClick={handleNextCategory} className="continue-button">
-                {/* ビールの場合は容器選択へ、最後のカテゴリーかつビール以外なら完了 */}
                 {currentCategory === 'ビール' 
                   ? '容器を選択する' 
                   : currentCategoryIndex === selectedCategories.length - 1 
