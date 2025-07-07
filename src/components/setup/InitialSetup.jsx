@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -44,7 +44,7 @@ function InitialSetup({ user, onComplete, addToast }) {
   const [currentBeerContainerIndex, setCurrentBeerContainerIndex] = useState(0);
 
   // 管理者マスター商品を取得（コンソールログのみ）
-  const fetchMasterProducts = async () => {
+  const fetchMasterProducts = useCallback(async () => {
     setLoadingProducts(true);
     try {
       console.log('📦 管理者のマスター商品を取得中...');
@@ -112,14 +112,14 @@ function InitialSetup({ user, onComplete, addToast }) {
     } finally {
       setLoadingProducts(false);
     }
-  };
+  }, []); // ✅ useCallback で関数をメモ化
 
   // コンポーネントマウント時にマスター商品を取得
   useEffect(() => {
     if (user) {
       fetchMasterProducts();
     }
-  }, [user]);
+  }, [user, fetchMasterProducts]); // ✅ fetchMasterProducts を依存配列に追加
 
   // Step 1: お店情報の処理
   const handleShopInfoSubmit = (e) => {
