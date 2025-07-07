@@ -1,7 +1,8 @@
 /* ==========================================
    飲み屋在庫管理アプリ - 完全整理CSS
-   .main-content削除・管理者顧客分離版
-   商品コード・容量対応版
+   AdminDashboard.jsx + InitialSetup.jsx対応版
+   管理者・顧客・初期設定分離版
+   商品コード・容量・定番商品対応版
    ========================================== */
 
 /* === ヘッダー === */
@@ -46,13 +47,14 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.2s ease;
 }
 
 .logout-button:hover {
   background: #dc2626;
 }
 
-/* === 下部タブ === */
+/* === 管理者タブ === */
 .admin-tabs {
   position: fixed;
   bottom: 0;
@@ -82,15 +84,65 @@
   text-align: center;
 }
 
-.tab-button:hover {
+.admin-tabs .tab-button:hover {
   color: #374151;
   background: #f9fafb;
 }
 
-.tab-button.active {
+.admin-tabs .tab-button.active {
   color: #3b82f6;
   background: #eff6ff;
   border-top-color: #3b82f6;
+}
+
+/* === 管理者メインコンテンツ === */
+.admin-main-content {
+  width: 100vw;
+  max-width: none;
+  margin: 0;
+  padding: 85px 0 80px 0;
+  min-height: calc(100vh - 150px);
+  
+  /* 中央寄せ設定 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* === 管理者セクション別スタイル === */
+.admin-stats-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.admin-controls-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-filters-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.admin-products-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-category-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 /* === 統計カード === */
@@ -100,7 +152,7 @@
   gap: 16px;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
 }
 
 .stat-card {
@@ -109,6 +161,11 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
 }
 
 .stat-card h3 {
@@ -125,11 +182,26 @@
   color: #374151;
 }
 
+/* 定番商品用統計カード */
+.stat-card.popular {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fbbf24;
+}
+
+.stat-card.popular h3 {
+  color: #92400e;
+}
+
+.stat-card.popular p {
+  color: #78350f;
+  font-weight: 700;
+}
+
 /* === コントロールエリア === */
 .admin-controls {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -142,30 +214,21 @@
   color: #374151;
 }
 
-.customer-controls {
+.admin-search-controls {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
   display: flex;
   justify-content: center;
-}
-
-.controls {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .search-filters {
   display: flex;
   gap: 1rem;
-  flex: 1;
-  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  width: 100%;
 }
 
 .search-input,
@@ -176,6 +239,15 @@
   border-radius: 4px;
   font-size: 14px;
   min-width: 200px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus,
+.filter-select:focus,
+.sort-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* === 商品グリッド === */
@@ -185,9 +257,8 @@
   gap: 16px;
   width: 100%;
   max-width: 1300px;
-  margin: 0 auto;
+  padding: 0 2rem;
   justify-items: center;
-  place-content: start;
 }
 
 /* === 商品カード === */
@@ -205,6 +276,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
 }
 
 .product-card:hover {
@@ -245,7 +317,53 @@
 .product-card.admin-card[data-category="ソフトドリンク"]::before { background: #3b82f6; }
 .product-card.admin-card[data-category="ノンアルコール"]::before { background: #6b7280; }
 
-/* 商品画像 */
+/* === 定番商品切り替えボタン === */
+.popular-toggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.popular-toggle.popular {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border: 2px solid #f59e0b;
+}
+
+.popular-toggle.popular:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.4);
+}
+
+.popular-toggle.non-popular {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #d1d5db;
+}
+
+.popular-toggle.non-popular:hover {
+  background: #f9fafb;
+  color: #374151;
+  border-color: #9ca3af;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* === 商品画像 === */
 .product-image {
   width: 60px;
   height: 60px;
@@ -267,7 +385,7 @@
   border-radius: 6px;
 }
 
-/* 商品ヘッダー */
+/* === 商品ヘッダー === */
 .product-header {
   margin-bottom: 8px;
   flex-grow: 1;
@@ -299,7 +417,7 @@
   text-overflow: ellipsis;
 }
 
-/* バッジ */
+/* === バッジ === */
 .product-badges {
   display: flex;
   gap: 4px;
@@ -309,7 +427,6 @@
 }
 
 .category-badge,
-.customer-badge,
 .master-badge,
 .user-added-badge {
   font-size: 9px;
@@ -331,11 +448,6 @@
   box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
 }
 
-.customer-badge {
-  background: #fef3c7;
-  color: #92400e;
-}
-
 /* カテゴリ別バッジ色 */
 .category-badge {
   color: white;
@@ -350,6 +462,21 @@
 .category-カクテル-チューハイ { background: #06b6d4; }
 .category-ソフトドリンク { background: #3b82f6; }
 .category-ノンアルコール { background: #6b7280; }
+
+/* === 定番商品バッジ === */
+.popular-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
+}
 
 /* === 商品コード・容量表示 === */
 .product-code,
@@ -399,7 +526,7 @@
   background: #2563eb;
 }
 
-/* 在庫コントロール */
+/* === 在庫コントロール === */
 .stock-controls {
   display: flex;
   align-items: center;
@@ -454,49 +581,7 @@
   color: #92400e;
 }
 
-/* 商品情報（価格情報は管理画面では非表示、CustomerAppでのみ表示） */
-.product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 8px 0;
-}
-
-/* 顧客アプリでの価格情報表示 */
-.price-info-customer {
-  font-size: 11px;
-  background: #f8fafc;
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.price-info-customer span {
-  font-size: 10px;
-  color: #6b7280;
-}
-
-/* 商品説明 */
-.product-description {
-  font-size: 10px;
-  color: #6b7280;
-  background: #f9fafb;
-  padding: 4px 6px;
-  border-radius: 3px;
-  margin: 4px 0;
-  line-height: 1.3;
-  max-height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-/* アクションボタン */
+/* === アクションボタン === */
 .product-actions {
   display: flex;
   gap: 4px;
@@ -551,47 +636,6 @@
 
 .check-button:hover {
   background: #fef3c7;
-}
-
-/* その他の要素 */
-.nomihodai-badge {
-  font-size: 9px;
-  padding: 2px 4px;
-  background: #fef3c7;
-  color: #92400e;
-  border-radius: 3px;
-  text-align: center;
-  margin: 4px 0;
-}
-
-.restock-button {
-  width: 100%;
-  padding: 6px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 10px;
-  margin-top: 6px;
-}
-
-.restock-button:hover {
-  background: #2563eb;
-}
-
-.customer-info {
-  font-size: 9px;
-  color: #6b7280;
-  background: #f9fafb;
-  padding: 6px 8px;
-  border-radius: 4px;
-  margin: 6px 0;
-  border: 1px solid #e5e7eb;
-}
-
-.customer-info div {
-  margin: 3px 0;
 }
 
 /* === ボタンスタイル === */
@@ -697,6 +741,7 @@
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 14px;
+  transition: border-color 0.2s ease;
 }
 
 .form-group input:focus,
@@ -705,6 +750,37 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 定番商品チェックボックス強調 */
+.form-group.full-width .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  padding: 12px 16px;
+  margin: 8px 0;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.form-group.full-width .checkbox-label:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
+}
+
+.form-group.full-width .checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #f59e0b;
 }
 
 .form-actions {
@@ -721,6 +797,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .cancel-button:hover {
@@ -734,13 +811,112 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .submit-button:hover {
   background: #2563eb;
 }
 
-/* === トースト通知 - 中央上部配置 === */
+/* === カテゴリ分析 === */
+.category-analysis {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.category-analysis h3 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  text-align: center;
+}
+
+.category-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.category-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+/* === 定番商品統計スタイル === */
+.popular-stat {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 3px solid #fbbf24;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.popular-stat .label {
+  color: #92400e !important;
+}
+
+.popular-stat .value {
+  color: #78350f !important;
+  font-weight: 700;
+}
+
+/* === 商品カードの定番商品強調 === */
+.product-card[data-popular="true"] {
+  position: relative;
+}
+
+.product-card[data-popular="true"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.product-card[data-popular="true"] {
+  border: 1px solid #fbbf24;
+}
+
+/* === 定番商品フィルター（将来実装用） === */
+.popular-filter-button {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.popular-filter-button:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
+}
+
+.popular-filter-button.active {
+  background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+}
+
+/* === トースト通知 === */
 .toast-container {
   position: fixed;
   top: 90px;
@@ -846,174 +1022,6 @@
   }
 }
 
-/* === その他 === */
-.no-products {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #6b7280;
-}
-
-.no-products p {
-  margin: 0.5rem 0;
-  font-size: 16px;
-}
-
-.category-analysis {
-  width: 100%;
-  max-width: 1200px;
-  margin: 2rem auto;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
-}
-
-.category-analysis h3 {
-  margin: 0 0 1rem 0;
-  color: #374151;
-  text-align: center;
-}
-
-.category-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-
-.category-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #f9fafb;
-  border-radius: 6px;
-}
-
-/* ==========================================
-   管理者専用CSS - Layout.css準拠版
-   ========================================== */
-
-/* 管理者メインコンテンツ - Layout.cssと同じ中央寄せパターン */
-.admin-main-content {
-  width: 100vw;
-  max-width: none;
-  margin: 0;
-  padding: 85px 0 80px 0;
-  min-height: calc(100vh - 150px);
-  
-  /* Layout.cssと同じ中央寄せ設定 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* 管理者セクション別スタイル - Layout.cssパターンを踏襲 */
-.admin-stats-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.admin-stats-section .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 2rem;
-}
-
-.admin-controls-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.admin-controls-section .admin-controls {
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.admin-filters-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.admin-filters-section .admin-search-controls {
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-.admin-filters-section .search-filters {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 900px;
-  width: 100%;
-}
-
-.admin-products-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.admin-products-section .products-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  width: 100%;
-  max-width: 1300px;
-  padding: 0 2rem;
-  justify-items: center;
-}
-
-.admin-category-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.admin-category-section .category-analysis {
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 2rem;
-}
-
-/* 管理者統計カード特殊スタイル */
-.admin-stats-section .stat-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-  border: 1px solid #e0f2fe;
-}
-
-.admin-stats-section .stat-card h3 {
-  color: #0369a1;
-}
-
-.admin-stats-section .stat-card p {
-  color: #1e40af;
-  font-weight: 700;
-}
-
 /* === ログイン・ローディング画面 === */
 .login-container {
   position: fixed;
@@ -1109,18 +1117,118 @@
   text-align: center;
 }
 
+/* === その他の要素 === */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.price-info-customer {
+  font-size: 11px;
+  background: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.price-info-customer span {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.product-description {
+  font-size: 10px;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 4px 6px;
+  border-radius: 3px;
+  margin: 4px 0;
+  line-height: 1.3;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.nomihodai-badge {
+  font-size: 9px;
+  padding: 2px 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 3px;
+  text-align: center;
+  margin: 4px 0;
+}
+
+.restock-button {
+  width: 100%;
+  padding: 6px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  margin-top: 6px;
+  transition: background 0.2s ease;
+}
+
+.restock-button:hover {
+  background: #2563eb;
+}
+
+.customer-info {
+  font-size: 9px;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 6px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.customer-info div {
+  margin: 3px 0;
+}
+
+.no-products {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.no-products p {
+  margin: 0.5rem 0;
+  font-size: 16px;
+}
+
+/* === 容器選択フィールド（ビール専用） === */
+.form-group select[name="productContainer"] {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
 /* === レスポンシブ対応 === */
 @media (max-width: 1400px) {
-  .products-grid,
-  .admin-products-section .products-grid {
+  .products-grid {
     grid-template-columns: repeat(4, 1fr);
     max-width: 1000px;
   }
 }
 
 @media (max-width: 1200px) {
-  .products-grid,
-  .admin-products-section .products-grid {
+  .products-grid {
     grid-template-columns: repeat(3, 1fr);
     max-width: 800px;
   }
@@ -1132,37 +1240,23 @@
   }
   
   .stats-grid,
-  .admin-stats-section .stats-grid,
   .admin-controls,
-  .admin-controls-section .admin-controls,
-  .customer-controls,
-  .controls,
   .products-grid,
-  .admin-products-section .products-grid,
   .category-analysis,
-  .admin-category-section .category-analysis,
-  .admin-filters-section .admin-search-controls {
+  .admin-search-controls {
     padding: 0 1rem;
   }
   
-  .products-grid,
-  .admin-products-section .products-grid {
+  .products-grid {
     grid-template-columns: repeat(2, 1fr);
     max-width: 600px;
   }
   
-  .stats-grid,
-  .admin-stats-section .stats-grid {
+  .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .search-filters,
-  .admin-filters-section .search-filters {
+  .search-filters {
     flex-direction: column;
     max-width: none;
   }
@@ -1178,7 +1272,6 @@
     width: 100%;
   }
 
-  /* 商品コード入力エリアのレスポンシブ */
   .product-code-input {
     flex-direction: column;
     gap: 8px;
@@ -1190,6 +1283,23 @@
 }
 
 @media (max-width: 768px) {
+  .popular-toggle {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    top: 6px;
+    left: 6px;
+  }
+  
+  .popular-badge {
+    font-size: 8px;
+    padding: 1px 3px;
+  }
+  
+  .form-group.full-width .checkbox-label {
+    padding: 10px 12px;
+  }
+
   .toast-container {
     top: 80px;
     left: 20px;
@@ -1209,14 +1319,12 @@
 }
 
 @media (max-width: 600px) {
-  .products-grid,
-  .admin-products-section .products-grid {
+  .products-grid {
     grid-template-columns: 1fr;
     max-width: 400px;
   }
   
-  .stats-grid,
-  .admin-stats-section .stats-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
   
@@ -1244,330 +1352,11 @@
 }
 
 @media (max-width: 480px) {
-  /* 商品コード・容量表示のモバイル対応 */
   .product-code,
   .product-volume,
   .product-code-display,
   .product-volume-display {
     font-size: 9px;
     padding: 1px 4px;
-  }
-}
-
-/* === 定番商品関連スタイル === */
-
-/* 定番商品バッジ */
-.popular-badge {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  font-size: 9px;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-weight: 600;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
-}
-
-/* 統計カードの定番商品用スタイル */
-.stat-card.popular {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #fbbf24;
-}
-
-.stat-card.popular h3 {
-  color: #92400e;
-}
-
-.stat-card.popular p {
-  color: #78350f;
-  font-weight: 600;
-}
-
-/* 定番商品チェックボックス */
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #374151;
-  padding: 8px 0;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.checkbox-label .checkmark {
-  display: none; /* 標準のチェックボックスを使用 */
-}
-
-.checkbox-label:hover {
-  color: #f59e0b;
-}
-
-.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-  content: '✓';
-  color: #f59e0b;
-  font-weight: bold;
-}
-
-/* 分析タブの定番商品統計 */
-.popular-stat {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-left: 3px solid #fbbf24;
-  border-radius: 4px;
-  padding: 4px 8px;
-}
-
-.popular-stat .label {
-  color: #92400e !important;
-}
-
-.popular-stat .value {
-  color: #78350f !important;
-  font-weight: 700;
-}
-
-/* フォーム内の定番商品チェックボックス強調 */
-.form-group.full-width .checkbox-label {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #fbbf24;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: 8px 0;
-  transition: all 0.2s ease;
-}
-
-.form-group.full-width .checkbox-label:hover {
-  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
-}
-
-.form-group.full-width .checkbox-label input[type="checkbox"] {
-  accent-color: #f59e0b;
-}
-
-/* 商品カードの定番商品強調 */
-.product-card[data-popular="true"] {
-  position: relative;
-}
-
-.product-card[data-popular="true"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.product-card[data-popular="true"] {
-  border: 1px solid #fbbf24;
-}
-
-/* 容器選択フィールド（ビール専用） */
-.form-group select[name="productContainer"] {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 16px;
-  padding-right: 32px;
-}
-
-/* 定番商品フィルター（将来実装用） */
-.popular-filter-button {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.popular-filter-button:hover {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
-}
-
-.popular-filter-button.active {
-  background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .popular-badge {
-    font-size: 8px;
-    padding: 1px 3px;
-  }
-  
-  .checkbox-label {
-    font-size: 12px;
-  }
-  
-  .form-group.full-width .checkbox-label {
-    padding: 10px 12px;
-  }
-}
-
-/* === 定番商品関連スタイル === */
-
-/* 商品カード左上の定番切り替えボタン */
-.popular-toggle {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.popular-toggle.popular {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  border: 2px solid #f59e0b;
-}
-
-.popular-toggle.popular:hover {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.4);
-}
-
-.popular-toggle.non-popular {
-  background: white;
-  color: #6b7280;
-  border: 2px solid #d1d5db;
-}
-
-.popular-toggle.non-popular:hover {
-  background: #f9fafb;
-  color: #374151;
-  border-color: #9ca3af;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 商品カードの位置調整（左上ボタン用） */
-.product-card.admin-card {
-  position: relative;
-}
-
-/* 定番商品バッジ（削除） */
-.popular-badge {
-  display: none; /* 左上の●/○で代用するため非表示 */
-}
-
-/* 統計カードの定番商品用スタイル */
-.stat-card.popular {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #fbbf24;
-}
-
-.stat-card.popular h3 {
-  color: #92400e;
-}
-
-.stat-card.popular p {
-  color: #78350f;
-  font-weight: 600;
-}
-
-/* 分析タブの定番商品統計 */
-.popular-stat {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-left: 3px solid #fbbf24;
-  border-radius: 4px;
-  padding: 4px 8px;
-}
-
-.popular-stat .label {
-  color: #92400e !important;
-}
-
-.popular-stat .value {
-  color: #78350f !important;
-  font-weight: 700;
-}
-
-/* 商品カードの定番商品強調（左上ボタンがあるため軽微に） */
-.product-card[data-popular="true"] {
-  position: relative;
-}
-
-.product-card[data-popular="true"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%);
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-/* 定番商品フィルター（将来実装用） */
-.popular-filter-button {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.popular-filter-button:hover {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
-}
-
-.popular-filter-button.active {
-  background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .popular-toggle {
-    width: 20px;
-    height: 20px;
-    font-size: 14px;
-    top: 6px;
-    left: 6px;
   }
 }

@@ -5,7 +5,7 @@ import { db } from '../../firebase';
 // 管理者UID（固定）
 const ADMIN_UID = 'slK7PLeu3lMnP5vE2MqytkKhiW13';
 
-// カテゴリー順序（人気・需要順）
+// カテゴリー順序（人気・需要順・10カテゴリー完全版）
 const categories = [
   'ビール',
   'カクテル・チューハイ', 

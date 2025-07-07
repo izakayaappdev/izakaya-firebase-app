@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 
-// 唐津市向け飲み物専門カテゴリー（泡盛追加）
+// 唐津市向け飲み物専門カテゴリー（10カテゴリー完全版）
 const categories = [
   'ビール', 
+  'カクテル・チューハイ',
   '日本酒', 
-  '焼酎', 
+  '焼酎',
+  'ウイスキー・ブランデー',
+  'ワイン',
+  'シャンパン・スパークリング',
   '泡盛',
-  'ワイン', 
-  'カクテル・チューハイ', 
   'ソフトドリンク',
   'ノンアルコール'
 ];
@@ -84,7 +86,7 @@ function ProductMasterManager({
     volume: '',
     volumeUnit: 'ml',
     container: '',
-    isPopular: false, // ✅ 新商品はデフォルトで非定番
+    isPopular: false,
     isMaster: true
   });
 
@@ -101,11 +103,42 @@ function ProductMasterManager({
       volume: '',
       volumeUnit: 'ml',
       container: '',
-      isPopular: false, // ✅ 定番商品フラグ追加
+      isPopular: false,
       isMaster: true
     });
     setShowAddForm(false);
     setEditingProduct(null);
+  };
+
+  // 定番商品切り替え機能
+  const handleTogglePopular = async (product) => {
+    try {
+      const newPopularStatus = !product.isPopular;
+      
+      const updateData = {
+        isPopular: newPopularStatus,
+        updatedAt: new Date()
+      };
+      
+      console.log(`🔄 定番商品切り替え: ${product.name} → ${newPopularStatus ? '定番' : '非定番'}`);
+      console.log('📝 更新データ:', updateData);
+      
+      const result = await updateProduct(product.id, updateData);
+      
+      if (result.success) {
+        console.log(`✅ 保存成功: ${product.name} isPopular = ${newPopularStatus}`);
+        addToast(
+          `${product.name}を${newPopularStatus ? '定番商品に設定' : '定番商品から除外'}しました`, 
+          'success'
+        );
+      } else {
+        console.error('❌ 保存失敗:', result.error);
+        addToast(result.error || '更新に失敗しました', 'error');
+      }
+    } catch (error) {
+      console.error('❌ 定番商品切り替えエラー:', error);
+      addToast('定番商品切り替えに失敗しました', 'error');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -128,7 +161,7 @@ function ProductMasterManager({
         profitRate: (parseFloat(newProduct.price) && parseFloat(newProduct.cost)) ?
           (((parseFloat(newProduct.price) - parseFloat(newProduct.cost)) / parseFloat(newProduct.price)) * 100) : 0,
         isNomihodai: false,
-        isPopular: newProduct.isPopular // ✅ 定番商品フラグ保存
+        isPopular: newProduct.isPopular
       };
 
       if (editingProduct) {
@@ -169,7 +202,7 @@ function ProductMasterManager({
       volume: product.volume?.toString() || '',
       volumeUnit: product.volumeUnit || 'ml',
       container: product.container || '',
-      isPopular: product.isPopular || false, // ✅ 定番商品状態を読み込み
+      isPopular: product.isPopular || false,
       isMaster: true
     });
     setEditingProduct(product);
@@ -188,33 +221,23 @@ function ProductMasterManager({
     }
   };
 
-  // 定番商品切り替え機能
-  const handleTogglePopular = async (product) => {
-    try {
-      const newPopularStatus = !product.isPopular;
-      const result = await updateProduct(product.id, { 
-        ...product, 
-        isPopular: newPopularStatus 
-      });
-      
-      if (result.success) {
-        addToast(
-          `${product.name}を${newPopularStatus ? '定番商品に設定' : '定番商品から除外'}しました`, 
-          'success'
-        );
-      } else {
-        addToast(result.error || '更新に失敗しました', 'error');
-      }
-    } catch (error) {
-      console.error('定番商品切り替えに失敗しました:', error);
-      addToast('定番商品切り替えに失敗しました', 'error');
+  // 商品コード自動生成
+  const handleGenerateProductCode = () => {
+    if (generateProductCode) {
+      const autoCode = generateProductCode();
+      setNewProduct({...newProduct, productCode: autoCode});
+    } else {
+      // generateProductCode関数がない場合のフォールバック
+      const timestamp = Date.now().toString().slice(-6);
+      const autoCode = `PROD${timestamp}`;
+      setNewProduct({...newProduct, productCode: autoCode});
     }
   };
 
   // マスター商品のフィルタリング
   const allMasterProducts = products.filter(product => product.isMaster);
   
-  // ✅ 定番商品の統計
+  // 定番商品の統計
   const popularProducts = allMasterProducts.filter(product => product.isPopular);
 
   // 検索・フィルター・ソート処理
@@ -256,14 +279,14 @@ function ProductMasterManager({
 
   return (
     <>
-      {/* ✅ 統計セクション（定番商品数追加） */}
+      {/* 統計セクション（定番商品数追加） */}
       <div className="admin-stats-section">
         <div className="stats-grid">
           <div className="stat-card">
             <h3>マスター商品数</h3>
             <p>{allMasterProducts.length}品目</p>
           </div>
-          <div className="stat-card popular"> {/* ✅ 定番商品統計 */}
+          <div className="stat-card popular">
             <h3>定番商品数</h3>
             <p>{popularProducts.length}品目</p>
           </div>
@@ -346,7 +369,7 @@ function ProductMasterManager({
           ) : (
             masterProducts.map(product => (
               <div key={product.id} className="product-card admin-card" data-category={product.category}>
-                {/* ✅ 定番商品切り替えボタン（左上） */}
+                {/* 定番商品切り替えボタン（左上） */}
                 <button 
                   className={`popular-toggle ${product.isPopular ? 'popular' : 'non-popular'}`}
                   onClick={() => handleTogglePopular(product)}
@@ -373,7 +396,6 @@ function ProductMasterManager({
                     <span className={`category-badge category-${product.category.replace(/[・]/g, '-')}`}>
                       {product.category}
                     </span>
-                    {/* ✅ 定番商品バッジは削除（左上の●/○で代用） */}
                   </div>
                 </div>
 
@@ -501,7 +523,7 @@ function ProductMasterManager({
                   </select>
                 </div>
 
-                {/* ✅ ビールの場合は容器選択追加 */}
+                {/* ビールの場合は容器選択追加 */}
                 {newProduct.category === 'ビール' && (
                   <div className="form-group">
                     <label htmlFor="product-container">容器</label>
@@ -555,8 +577,6 @@ function ProductMasterManager({
                   />
                 </div>
 
-                {/* ✅ 定番商品チェックボックス削除 */}
-
                 <div className="form-group full-width">
                   <label htmlFor="product-description">商品説明</label>
                   <textarea
@@ -602,7 +622,7 @@ function CustomerProductManager({
         const masterProduct = {
           ...product,
           isMaster: true,
-          isPopular: false, // ✅ デフォルトは定番商品ではない
+          isPopular: false,
           stock: 0,
           createdAt: new Date()
         };
@@ -742,16 +762,16 @@ function CustomerProductManager({
 function DataAnalytics({ products }) {
   const masterProducts = products.filter(product => product.isMaster);
   const customerProducts = products.filter(product => !product.isMaster);
-  const popularProducts = masterProducts.filter(product => product.isPopular); // ✅ 定番商品統計
+  const popularProducts = masterProducts.filter(product => product.isPopular);
 
   // カテゴリー別分析
   const categoryAnalysis = categories.map(category => {
     const categoryProducts = masterProducts.filter(product => product.category === category);
-    const categoryPopular = popularProducts.filter(product => product.category === category); // ✅ カテゴリー別定番商品
+    const categoryPopular = popularProducts.filter(product => product.category === category);
     return {
       category,
       count: categoryProducts.length,
-      popularCount: categoryPopular.length, // ✅ 定番商品数
+      popularCount: categoryPopular.length,
       percentage: masterProducts.length > 0 ? Math.round((categoryProducts.length / masterProducts.length) * 100) : 0
     };
   });
@@ -765,7 +785,7 @@ function DataAnalytics({ products }) {
             <h3>マスター商品数</h3>
             <p>{masterProducts.length}品目</p>
           </div>
-          <div className="stat-card popular"> {/* ✅ 定番商品統計 */}
+          <div className="stat-card popular">
             <h3>定番商品数</h3>
             <p>{popularProducts.length}品目</p>
           </div>
@@ -801,7 +821,7 @@ function DataAnalytics({ products }) {
                     <span>マスター商品:</span>
                     <strong>{count}品目</strong>
                   </div>
-                  <div className="stat-row popular-stat"> {/* ✅ 定番商品表示 */}
+                  <div className="stat-row popular-stat">
                     <span>定番商品:</span>
                     <strong>{popularCount}品目</strong>
                   </div>
@@ -819,7 +839,7 @@ function DataAnalytics({ products }) {
   );
 }
 
-// メインの管理者ダッシュボード
+// メイン管理者ダッシュボード
 function AdminDashboard({ user, logout, addToast }) {
   const [activeTab, setActiveTab] = useState('products');
   const { 
