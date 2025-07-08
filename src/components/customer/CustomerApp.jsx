@@ -32,64 +32,11 @@ const getCategoryGradient = (category) => {
   return gradients[category] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
 };
 
-// 再入荷ボタンコンポーネント
-function RestockButtons({ productId, onRestock }) {
-  const restockAmounts = [5, 10, 50];
-  
-  return (
-    <div className="restock-buttons">
-      {restockAmounts.map(amount => (
-        <button
-          key={amount}
-          onClick={() => onRestock(productId, amount)}
-          className="restock-button"
-        >
-          +{amount}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export default function CustomerApp() {
   const { user, logout } = useAuth();
-  // ✅ allProductsも追加で取得
   const { products, loading, addProduct, updateProduct, updateStock, generateProductCode, allProducts } = useProducts(user);
   const { toasts, addToast, removeToast } = useToast();
   const [activeTab, setActiveTab] = useState('inventory');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [showInactive, setShowInactive] = useState(false);
-
-  // フィルタリング
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.manufacturer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    const matchesActive = showInactive || product.isActive !== false;
-    
-    return matchesSearch && matchesCategory && matchesActive;
-  });
-
-  // 在庫変更
-  const handleStockChange = async (productId, change) => {
-    try {
-      await updateStock(productId, change);
-      addToast(`在庫を${change > 0 ? '追加' : '減少'}しました`, 'success');
-    } catch (error) {
-      addToast('在庫更新に失敗しました', 'error');
-    }
-  };
-
-  // 商品停止/復活
-  const handleToggleActive = async (productId, currentActive) => {
-    try {
-      await updateProduct(productId, { isActive: !currentActive });
-      addToast(currentActive ? '商品を停止しました' : '商品を復活しました', 'success');
-    } catch (error) {
-      addToast('商品状態の更新に失敗しました', 'error');
-    }
-  };
 
   if (loading) {
     return (
@@ -122,7 +69,7 @@ export default function CustomerApp() {
             onAddProduct={addProduct}
             generateProductCode={generateProductCode}
             products={products}
-            allProducts={allProducts}  // ✅ 追加：検索用データ
+            allProducts={allProducts}
             categories={categories}
             getCategoryGradient={getCategoryGradient}
             addToast={addToast}
@@ -130,173 +77,12 @@ export default function CustomerApp() {
         )}
 
         {activeTab === 'inventory' && (
-          <div className="inventory-section">
-            {/* 統計表示 */}
-            <div className="inventory-stats">
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <h3>総在庫価値</h3>
-                  <p>¥{products.reduce((sum, p) => sum + (p.cost * p.stock), 0).toLocaleString()}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>想定利益</h3>
-                  <p>¥{products.reduce((sum, p) => sum + (p.profit * p.stock), 0).toLocaleString()}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>在庫少商品</h3>
-                  <p>{products.filter(p => p.stock <= p.minStock && p.stock > 0).length}品目</p>
-                </div>
-                <div className="stat-card">
-                  <h3>追加商品</h3>
-                  <p>{products.filter(p => !p.isMaster).length}品目</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 検索・フィルター */}
-            <div className="inventory-controls">
-              <div className="search-filters">
-                <input
-                  type="text"
-                  placeholder="商品名・メーカーで検索"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="category-filter"
-                >
-                  <option value="">全カテゴリ</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setShowInactive(!showInactive)}
-                  className={`toggle-button ${showInactive ? 'active' : ''}`}
-                >
-                  {showInactive ? '📦 在庫中' : '📤 停止中'}
-                </button>
-              </div>
-            </div>
-
-            {/* 商品一覧 */}
-            <div className="products-grid">
-              {filteredProducts.length === 0 ? (
-                <div className="no-products">
-                  <p>商品がありません</p>
-                  <p>新商品を追加するか、フィルターを変更してください</p>
-                </div>
-              ) : (
-                filteredProducts.map(product => (
-                  <div key={product.id} className="product-card customer-view">
-                    {/* バッジ（修正版） */}
-                    <div className="product-top-badges">
-                      {/* 左上：★バッジ */}
-                      <div className="badge-left">
-                        {!product.isMaster && (
-                          <span className="user-added-badge">★ 追加</span>
-                        )}
-                      </div>
-                      
-                      {/* 中央上：カテゴリバッジ */}
-                      <div className="badge-center">
-                        <span className="category-badge">
-                          {product.category}
-                        </span>
-                        {product.isActive === false && (
-                          <span className="inactive-badge">停止中</span>
-                        )}
-                      </div>
-                      
-                      {/* 右上：×ボタン */}
-                      <div className="badge-right">
-                        {showInactive ? (
-                          <button 
-                            onClick={() => handleToggleActive(product.id, false)}
-                            className="reactivate-button"
-                          >
-                            復活
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleToggleActive(product.id, true)}
-                            className="remove-button"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 商品名 */}
-                    <div className="product-name">{product.name}</div>
-                    
-                    {/* 商品詳細 */}
-                    <div className="product-details">
-                      {product.manufacturer && <div>{product.manufacturer}</div>}
-                      {product.volume && (
-                        <div>{product.volume}{product.volumeUnit}</div>
-                      )}
-                      {product.productCode && (
-                        <div>商品コード: {product.productCode}</div>
-                      )}
-                    </div>
-
-                    {/* 在庫情報 */}
-                    <div className={`stock-info ${product.stock <= product.minStock ? 'low' : product.stock === 0 ? 'out' : ''}`}>
-                      在庫: {product.stock}
-                      {product.minStock && ` (最小: ${product.minStock})`}
-                    </div>
-
-                    {/* 在庫操作 */}
-                    {product.isActive !== false && (
-                      <div className="stock-controls">
-                        <button 
-                          onClick={() => handleStockChange(product.id, -1)}
-                          className="stock-btn"
-                        >
-                          −
-                        </button>
-                        <input
-                          type="number"
-                          value={product.stock}
-                          onChange={(e) => {
-                            const newStock = parseInt(e.target.value) || 0;
-                            handleStockChange(product.id, newStock - product.stock);
-                          }}
-                          className="stock-input"
-                        />
-                        <button 
-                          onClick={() => handleStockChange(product.id, 1)}
-                          className="stock-btn"
-                        >
-                          ＋
-                        </button>
-                      </div>
-                    )}
-
-                    {/* 再入荷ボタン */}
-                    {product.stock === 0 && product.isActive !== false && (
-                      <button 
-                        onClick={() => handleStockChange(product.id, 10)}
-                        className="restock-button"
-                      >
-                        📦 再入荷
-                      </button>
-                    )}
-
-                    {/* 飲み放題バッジ */}
-                    {product.isNomihodai && (
-                      <div className="nomihodai-badge">飲み放題</div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <InventoryTab 
+            products={products}
+            updateStock={updateStock}
+            updateProduct={updateProduct}
+            addToast={addToast}
+          />
         )}
 
         {activeTab === 'inventory-check' && (

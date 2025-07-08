@@ -155,8 +155,10 @@ function InventoryTab({
     }
   };
 
-  // アクティブ商品と非アクティブ商品を分ける
-  const activeProducts = products.filter(product => product.isActive !== false);
+  // アクティブ商品と非アクティブ商品を分ける（初期設定商品も含む）
+  const activeProducts = products.filter(product => 
+    product.isActive !== false || product.isVisible === true
+  );
   const inactiveProducts = products.filter(product => product.isActive === false);
   
   // 表示する商品を決定
